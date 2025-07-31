@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Izin Harian Karyawan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #2c3e50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #34495e;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #2c3e50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📋 Data Izin Harian Karyawan</h1>
+
+  <form id="izinForm">
+    <label>Nama Karyawan:</label>
+    <input type="text" id="nama" required>
+
+    <label>Tanggal Izin:</label>
+    <input type="date" id="tanggal" required>
+
+    <label>Jenis Izin:</label>
+    <select id="jenis" required>
+      <option value="">-- Pilih Jenis Izin --</option>
+      <option>Sakit</option>
+      <option>Cuti</option>
+      <option>Izin Pribadi</option>
+      <option>Terlambat</option>
+    </select>
+
+    <label>Keterangan:</label>
+    <textarea id="keterangan"></textarea>
+
+    <button type="submit">Tambah Data</button>
+  </form>
+
+  <table id="izinTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama Karyawan</th>
+        <th>Tanggal</th>
+        <th>Jenis Izin</th>
+        <th>Keterangan</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    let no = 1;
+    const form = document.getElementById('izinForm');
+    const tableBody = document.getElementById('izinTable').getElementsByTagName('tbody')[0];
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Ambil data
+      const nama = document.getElementById('nama').value;
+      const tanggal = document.getElementById('tanggal').value;
+      const jenis = document.getElementById('jenis').value;
+      const keterangan = document.getElementById('keterangan').value;
+
+      // Tambah baris baru ke tabel
+      const newRow = tableBody.insertRow();
+      newRow.insertCell(0).innerText = no++;
+      newRow.insertCell(1).innerText = nama;
+      newRow.insertCell(2).innerText = tanggal;
+      newRow.insertCell(3).innerText = jenis;
+      newRow.insertCell(4).innerText = keterangan;
+
+      // Reset form
+      form.reset();
+    });
+  </script>
+
+</body>
+</html>
