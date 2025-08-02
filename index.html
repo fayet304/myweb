@@ -152,54 +152,56 @@
     }
 
     function selesaiIzin() {
-      if (izinStarted) {
-        izinStarted = false;
-        clearInterval(interval);
+  if (izinStarted) {
+    izinStarted = false;
+    clearInterval(interval);
 
-        const endTime = Date.now();
-        const durasi = Math.floor((endTime - startTime) / 1000);
-        const durasiText = formatMenitDetik(durasi);
+    const endTime = Date.now();
+    const durasi = Math.floor((endTime - startTime) / 1000);
+    const durasiText = formatMenitDetik(durasi);
 
-        document.getElementById("durasiIzin").innerText = durasiText;
-        document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
+    document.getElementById("durasiIzin").innerText = durasiText;
+    document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
 
-        const peringatanBox = document.getElementById("peringatanBox");
-        peringatanBox.style.display = "block";
+    const peringatanBox = document.getElementById("peringatanBox");
+    peringatanBox.style.display = "block";
 
-        if (durasi > 900) {
-          peringatanBox.textContent = "⚠️ PERHATIAN: Anda telah melebihi batas waktu izin 15 menit!";
-          peringatanBox.className = "peringatan lebih";
-        } else {
-          peringatanBox.textContent = "✅ Selamat datang kembali!";
-          peringatanBox.className = "peringatan normal";
-        }
+    if (durasi > 900) {
+      peringatanBox.textContent = "⚠️ PERHATIAN: Anda telah melebihi batas waktu izin 15 menit!";
+      peringatanBox.className = "peringatan lebih";
+    } else {
+      peringatanBox.textContent = "✅ Selamat datang kembali!";
+      peringatanBox.className = "peringatan normal";
+    }
 
-        const data = {
-          const nama = document.getElementById("nama").value;
-const izin = document.getElementById("izin").value;
-const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
-const waktu_selesai = new Date().toLocaleString("id-ID");
-const durasiStr = durasiText;
+    // Ambil data untuk dikirim ke SheetDB
+    const nama = document.getElementById("nama").value;
+    const izin = document.getElementById("izin").value;
+    const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
+    const waktu_selesai = new Date().toLocaleString("id-ID");
+    const durasiStr = durasiText;
 
-fetch("https://sheetdb.io/api/v1/YOUR_API_ID", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    data: [
-      {
-        nama: nama,
-        izin: izin,
-        waktu_mulai: waktu_mulai,
-        waktu_selesai: waktu_selesai,
-        durasi: durasiStr
-      }
-    ]
-  })
-})
-.then(res => res.json())
-.then(res => {
-  console.log("Data dikirim:", res);
-});
-            
+    // Kirim data ke SheetDB
+    fetch("https://sheetdb.io/api/v1/r0e31vrteuqpx", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data: [
+          {
+            nama: nama,
+            izin: izin,
+            waktu_mulai: waktu_mulai,
+            waktu_selesai: waktu_selesai,
+            durasi: durasiStr
+          }
+        ]
+      })
+    })
+    .then(res => res.json())
+    .then(res => {
+      console.log("Data dikirim:", res);
+    });
+  }
+}
