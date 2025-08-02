@@ -174,14 +174,13 @@
       peringatanBox.className = "peringatan normal";
     }
 
-    // Ambil data untuk dikirim ke SheetDB
+    
     const nama = document.getElementById("nama").value;
     const izin = document.getElementById("izin").value;
     const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
     const waktu_selesai = new Date().toLocaleString("id-ID");
     const durasiStr = durasiText;
 
-    // Kirim data ke SheetDB
     fetch("https://sheetdb.io/api/v1/r0e31vrteuqpx", {
       method: "POST",
       headers: {
