@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Form Izin Keluar</title>
   <style>
     body {
@@ -73,7 +73,7 @@
       <option value="muhammad alfayet">muhammad alfayet</option>
       <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
       <option value="CUSYATI">CUSYATI</option>
-      <!-- Tambahkan yang lain sesuai kebutuhan -->
+      <!-- Tambahkan lainnya jika perlu -->
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -86,14 +86,20 @@
     <button type="button" onclick="mulaiIzin()">Mulai</button>
     <button type="button" onclick="selesaiIzin()">Selesai</button>
 
-    <div class="timer">Waktu Berjalan: <span id="waktuBerjalan">0 detik</span></div>
-    <div class="duration">Durasi Izin: <span id="durasiIzin">0 detik</span></div>
+    <div class="timer">Waktu Berjalan: <span id="waktuBerjalan">0 menit 0 detik</span></div>
+    <div class="duration">Durasi Izin: <span id="durasiIzin">0 menit 0 detik</span></div>
   </form>
 
   <script>
     let startTime;
     let interval;
     let izinStarted = false;
+
+    function formatMenitDetik(totalDetik) {
+      const menit = Math.floor(totalDetik / 60);
+      const detik = totalDetik % 60;
+      return `${menit} menit ${detik} detik`;
+    }
 
     function mulaiIzin() {
       if (!izinStarted) {
@@ -103,7 +109,7 @@
         interval = setInterval(() => {
           const now = Date.now();
           const elapsed = Math.floor((now - startTime) / 1000);
-          document.getElementById("waktuBerjalan").innerText = `${elapsed} detik`;
+          document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
         }, 1000);
       }
     }
@@ -115,16 +121,14 @@
 
         const endTime = Date.now();
         const durasi = Math.floor((endTime - startTime) / 1000);
-        document.getElementById("durasiIzin").innerText = `${durasi} detik`;
 
-        // Reset tampilan waktu berjalan
-        document.getElementById("waktuBerjalan").innerText = `0 detik`;
+        document.getElementById("durasiIzin").innerText = formatMenitDetik(durasi);
+        document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
 
-        // Kirim data ke server Google Script / lainnya (opsional)
         const data = {
           nama: document.getElementById("nama").value,
           jenisIzin: document.getElementById("izin").value,
-          durasi: durasi
+          durasi: formatMenitDetik(durasi)
         };
 
         fetch("PASTE_LINK_WEBAPP_DI_SINI", {
