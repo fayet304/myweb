@@ -84,7 +84,6 @@
       <option value="muhammad alfayet">muhammad alfayet</option>
       <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
       <option value="CUSYATI">CUSYATI</option>
-      <!-- ...tambahkan lainnya... -->
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -106,6 +105,7 @@
     let startTime;
     let interval;
     let izinStarted = false;
+    let sudahDiperingatkan = false;
 
     function formatMenitDetik(totalDetik) {
       const menit = Math.floor(totalDetik / 60);
@@ -116,12 +116,19 @@
     function mulaiIzin() {
       if (!izinStarted) {
         izinStarted = true;
+        sudahDiperingatkan = false;
         startTime = Date.now();
 
         interval = setInterval(() => {
           const now = Date.now();
           const elapsed = Math.floor((now - startTime) / 1000);
           document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
+
+          // Peringatan otomatis jika melewati 15 menit
+          if (elapsed >= 900 && !sudahDiperingatkan) {
+            sudahDiperingatkan = true;
+            alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
+          }
         }, 1000);
       }
     }
@@ -152,10 +159,10 @@
         })
         .then(res => res.json())
         .then(response => {
-          alert("Data berhasil dikirim!");
+          alert("✅ Data berhasil dikirim!");
         })
         .catch(error => {
-          alert("Gagal mengirim data!");
+          alert("❌ Gagal mengirim data!");
           console.error(error);
         });
       }
