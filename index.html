@@ -7,17 +7,16 @@
   <style>
     body {
       background: url('bck.png');
-      background-size:cover;
+      background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
       font-family: Arial, sans-serif;
     }
 
-    h1 {
+    h1, h2 {
       text-align: center;
       color: #fff;
-      margin-bottom: 30px;
       text-shadow: 1px 1px 4px #000;
     }
 
@@ -60,13 +59,8 @@
       margin-top: 20px;
     }
 
-    .timer span {
-      color: #e74c3c;
-    }
-
-    .duration span {
-      color: #27ae60;
-    }
+    .timer span { color: #e74c3c; }
+    .duration span { color: #27ae60; }
 
     .peringatan {
       margin-top: 20px;
@@ -85,6 +79,28 @@
     .peringatan.normal {
       background-color: #ccffcc;
       color: #2ecc71;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid #999;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
+
+    #histori {
+      max-width: 95%;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -117,9 +133,28 @@
     <div id="peringatanBox" class="peringatan" style="display:none;"></div>
   </form>
 
+  <div id="histori">
+    <h2>Histori Izin</h2>
+    <button onclick="exportToExcel()">Export ke Excel</button>
+    <table id="historiTabel">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>Jenis Izin</th>
+          <th>Mulai</th>
+          <th>Selesai</th>
+          <th>Durasi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
   <script>
-    let startTime;
-    let interval;
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec"; // GANTI URL DI SINI
+
+    let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
 
@@ -133,7 +168,7 @@
       const nama = document.getElementById("nama").value;
       const izin = document.getElementById("izin").value;
 
-      if (nama === "" || izin === "") {
+      if (!nama || !izin) {
         alert("⚠️ Silakan pilih nama dan jenis izin terlebih dahulu.");
         return;
       }
@@ -186,29 +221,54 @@
         const waktu_selesai = new Date().toLocaleString("id-ID");
         const durasiStr = durasiText;
 
-        fetch("https://script.google.com/macros/s/AKfycbxwdVtJ82bZL2EUzz0DzhgdRFWjC9h1Fmr7qNBn5Fl9CUMulYgzZL2LqEZkCVzSKJvHLA/exec", {
+        fetch(SCRIPT_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            data: [
-              {
-                nama: nama,
-                izin: izin,
-                waktu_mulai: waktu_mulai,
-                waktu_selesai: waktu_selesai,
-                durasi: durasiStr
-              }
-            ]
+            data: [{
+              nama, izin, waktu_mulai, waktu_selesai, durasi: durasiStr
+            }]
           })
         })
         .then(res => res.json())
-        .then(res => {
-          console.log("Data dikirim:", res);
+        .then(() => {
+          loadHistori();
         });
       }
     }
+
+    function loadHistori() {
+      fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.querySelector("#historiTabel tbody");
+          tbody.innerHTML = "";
+          data.forEach((item, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${index + 1}</td>
+              <td>${item.nama}</td>
+              <td>${item.izin}</td>
+              <td>${item.mulai}</td>
+              <td>${item.selesai}</td>
+              <td>${item.durasi}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function exportToExcel() {
+      const table = document.getElementById("historiTabel");
+      const html = table.outerHTML.replace(/ /g, '%20');
+      const filename = 'Histori_Izin.xls';
+      const link = document.createElement('a');
+      link.href = 'data:application/vnd.ms-excel,' + html;
+      link.download = filename;
+      link.click();
+    }
+
+    window.onload = loadHistori;
   </script>
 </body>
 </html>
