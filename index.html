@@ -175,35 +175,31 @@
         }
 
         const data = {
-          data: {
-            nama: document.getElementById("nama").value,
-            jenis_izin: document.getElementById("izin").value,
-            durasi: durasiText,
-            waktu_selesai: new Date().toLocaleString("id-ID")
-          }
-        };
+          const nama = document.getElementById("nama").value;
+const izin = document.getElementById("izin").value;
+const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
+const waktu_selesai = new Date().toLocaleString("id-ID");
+const durasiStr = durasiText;
 
-         fetch("https://sheetdb.io/api/v1/YOUR_API_ID", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          data: [
-            {
-              nama: nama,
-              izin: izin,
-              waktu_mulai: mulai,
-              waktu_selesai: selesai,
-              durasi: durasiStr
-            }
-          ]
-        })
-      }).then(res => res.json())
-      .then(res => {
-        console.log("Data dikirim:", res);
-      });
-    }
-  </script>
-</body>
-</html>
+fetch("https://sheetdb.io/api/v1/YOUR_API_ID", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    data: [
+      {
+        nama: nama,
+        izin: izin,
+        waktu_mulai: waktu_mulai,
+        waktu_selesai: waktu_selesai,
+        durasi: durasiStr
+      }
+    ]
+  })
+})
+.then(res => res.json())
+.then(res => {
+  console.log("Data dikirim:", res);
+});
+            
