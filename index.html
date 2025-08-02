@@ -109,21 +109,25 @@
   </form>
 
   <script>
-    let startTime, timerInterval;
+    
+   let startTime;
+let interval;
+let izinStarted = false;
 
-    function mulaiIzin() {
-      startTime = new Date();
-      document.getElementById("hasilDurasi").textContent = "";
-      timerInterval = setInterval(updateTimer, 1000);
+function mulaiIzin() {
+    if (!izinStarted) {
+        izinStarted = true;
+        startTime = Date.now();
+
+        interval = setInterval(() => {
+            const now = Date.now();
+            const elapsed = Math.floor((now - startTime) / 1000);
+            document.getElementById("waktuBerjalan").innerText = `${elapsed} detik`;
+        }, 1000);
     }
+}
 
-    function updateTimer() {
-      const now = new Date();
-      const elapsed = Math.floor((now - startTime) / 1000);
-      document.getElementById("waktuBerjalan").textContent = elapsed + " detik";
-    }
-
-    function selesaiIzin() {
+function selesaiIzin() {
     if (izinStarted) {
         izinStarted = false;
         clearInterval(interval);
@@ -131,6 +135,11 @@
         const endTime = Date.now();
         const durasi = Math.floor((endTime - startTime) / 1000);
         document.getElementById("durasiIzin").innerText = `${durasi} detik`;
+
+        // Kosongkan atau reset tampilan waktu berjalan
+        document.getElementById("waktuBerjalan").innerText = `0 detik`;
+    }
+}
 
        const data = {
       nama: document.getElementById("nama").value,
