@@ -1,119 +1,206 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Form Izin Keluar</title>
   <style>
     body {
+      background: url('bck.png');
+      background-size:cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 20px;
     }
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 500px;
-      margin: auto;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 4px #000;
     }
-    label, input, select, button {
+
+    form {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 420px;
+      margin: 0 auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    label {
       display: block;
+      margin: 10px 0 5px;
+    }
+
+    select, button {
       width: 100%;
-      margin-top: 10px;
-    }
-    button {
-      background: #28a745;
-      color: white;
       padding: 10px;
-      border: none;
+      margin-bottom: 15px;
       border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
+      border: 1px solid #ccc;
     }
-    #hasil-pesan {
+
+    button {
+      background-color: #2c3e50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1a252f;
+    }
+
+    .timer, .duration {
+      text-align: center;
+      font-weight: bold;
       margin-top: 20px;
+    }
+
+    .timer span {
+      color: #e74c3c;
+    }
+
+    .duration span {
+      color: #27ae60;
+    }
+
+    .peringatan {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .peringatan.lebih {
+      background-color: #ffcccc;
+      color: #c0392b;
+    }
+
+    .peringatan.normal {
+      background-color: #ccffcc;
+      color: #2ecc71;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Form Izin Keluar</h2>
 
-    <label for="nama">Nama:</label>
-    <input type="text" id="nama" required>
-
-    <label for="izin">Alasan Izin:</label>
-    <select id="izin">
-      <option value="Keperluan Pribadi">Keperluan Pribadi</option>
-      <option value="Ke Dokter">Ke Dokter</option>
-      <option value="Lainnya">Lainnya</option>
+  <h1>Form Izin Keluar</h1>
+  <form id="izinForm">
+    <label for="nama">Nama Karyawan:</label>
+    <select id="nama">
+      <option value="Pilih Nama">Pilih Nama</option>
+      <option value="muhammad alfayet">muhammad alfayet</option>
+      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
+      <option value="CUSYATI">CUSYATI</option>
     </select>
 
-    <button onclick="mulaiIzin()">Mulai</button>
-    <button onclick="selesaiIzin()">Selesai</button>
+    <label for="izin">Jenis Izin:</label>
+    <select id="izin">
+      <option value="pilih">pilih</option>
+      <option value="Toilet">Toilet</option>
+      <option value="membeli_makan">Membeli Makan</option>
+      <option value="Merokok">Merokok</option>
+    </select>
 
-    <div id="durasi"></div>
-    <div id="hasil-pesan"></div>
-  </div>
+    <button type="button" onclick="mulaiIzin()">Mulai</button>
+    <button type="button" onclick="selesaiIzin()">Selesai</button>
+
+    <div class="timer">Waktu Berjalan: <span id="waktuBerjalan">0 menit 0 detik</span></div>
+    <div class="duration">Durasi Izin: <span id="durasiIzin">0 menit 0 detik</span></div>
+
+    <div id="peringatanBox" class="peringatan" style="display:none;"></div>
+  </form>
 
   <script>
-    let waktuMulai;
+    let startTime;
+    let interval;
+    let izinStarted = false;
+    let sudahDiperingatkan = false;
+
+    const sheetdbAPI = "https://sheetdb.io/api/v1/YOUR_API_ID"; // ← Ganti dengan milikmu
+
+    function formatMenitDetik(totalDetik) {
+      const menit = Math.floor(totalDetik / 60);
+      const detik = totalDetik % 60;
+      return `${menit} menit ${detik} detik`;
+    }
 
     function mulaiIzin() {
-      waktuMulai = new Date();
-      alert("Izin dimulai pada: " + waktuMulai.toLocaleTimeString());
+      if (!izinStarted) {
+        izinStarted = true;
+        sudahDiperingatkan = false;
+        startTime = Date.now();
+        document.getElementById("peringatanBox").style.display = "none";
+
+        interval = setInterval(() => {
+          const now = Date.now();
+          const elapsed = Math.floor((now - startTime) / 1000);
+          document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
+
+          if (elapsed >= 900 && !sudahDiperingatkan) {
+            sudahDiperingatkan = true;
+            alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
+          }
+        }, 1000);
+      }
     }
 
     function selesaiIzin() {
-      if (!waktuMulai) {
-        alert("Harap tekan MULAI terlebih dahulu.");
-        return;
-      }
+      if (izinStarted) {
+        izinStarted = false;
+        clearInterval(interval);
 
-      const waktuSelesai = new Date();
-      const selisih = waktuSelesai - waktuMulai;
-      const menit = Math.floor(selisih / 60000);
-      const detik = Math.floor((selisih % 60000) / 1000);
-      const durasiStr = `${menit} menit ${detik} detik`;
+        const endTime = Date.now();
+        const durasi = Math.floor((endTime - startTime) / 1000);
+        const durasiText = formatMenitDetik(durasi);
 
-      document.getElementById("durasi").innerText = "Durasi: " + durasiStr;
+        document.getElementById("durasiIzin").innerText = durasiText;
+        document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
 
-      const hasil = document.getElementById("hasil-pesan");
-      if (menit > 15) {
-        hasil.innerHTML = `<div style='color: red; font-size: 20px; font-weight: bold;'>⚠️ Peringatan: Durasi izin lebih dari 15 menit!</div>`;
-      } else {
-        hasil.innerHTML = `<div style='color: green; font-size: 18px; font-weight: bold;'>✅ Selamat datang kembali!</div>`;
-      }
+        const peringatanBox = document.getElementById("peringatanBox");
+        peringatanBox.style.display = "block";
 
-      // Kirim ke Google Sheet (via SheetDB)
-      const nama = document.getElementById("nama").value;
-      const izin = document.getElementById("izin").value;
-      const mulai = waktuMulai.toISOString();
-      const selesai = waktuSelesai.toISOString();
+        if (durasi > 900) {
+          peringatanBox.textContent = "⚠️ PERHATIAN: Anda telah melebihi batas waktu izin 15 menit!";
+          peringatanBox.className = "peringatan lebih";
+        } else {
+          peringatanBox.textContent = "✅ Selamat datang kembali!";
+          peringatanBox.className = "peringatan normal";
+        }
 
-      fetch("https://sheetdb.io/api/v1/r0e31vrteuqpx", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          data: [
-            {
-              nama: nama,
-              izin: izin,
-              waktu_mulai: mulai,
-              waktu_selesai: selesai,
-              durasi: durasiStr
-            }
-          ]
+        const data = {
+          data: {
+            nama: document.getElementById("nama").value,
+            jenis_izin: document.getElementById("izin").value,
+            durasi: durasiText,
+            waktu_selesai: new Date().toLocaleString("id-ID")
+          }
+        };
+
+        fetch(sheetdbAPI, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json"
+          }
         })
-      }).then(res => res.json())
-      .then(res => {
-        console.log("Data dikirim:", res);
-      });
+        .then(res => res.json())
+        .then(response => {
+          console.log("✅ Terkirim ke SheetDB:", response);
+        })
+        .catch(error => {
+          alert("❌ Gagal mengirim data ke SheetDB.");
+          console.error(error);
+        });
+      }
     }
   </script>
+
 </body>
 </html>
