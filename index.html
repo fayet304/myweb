@@ -2,6 +2,7 @@
   let startTime;
   let interval;
   let izinStarted = false;
+  let alreadyAlerted = false;
 
   function formatMenitDetik(totalDetik) {
     const menit = Math.floor(totalDetik / 60);
@@ -12,6 +13,7 @@
   function mulaiIzin() {
     if (!izinStarted) {
       izinStarted = true;
+      alreadyAlerted = false;
       startTime = Date.now();
 
       interval = setInterval(() => {
@@ -19,11 +21,9 @@
         const elapsed = Math.floor((now - startTime) / 1000);
         document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
 
-        if (elapsed > 960) {
+        if (elapsed > 960 && !alreadyAlerted) {
           alert("⚠️ Anda telah melewati batas izin 16 menit!");
-          clearInterval(interval);
-          izinStarted = false;
-          document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
+          alreadyAlerted = true;
         }
       }, 1000);
     }
@@ -55,12 +55,14 @@
       })
       .then(res => res.json())
       .then(response => {
-        alert("Data berhasil dikirim!");
+        alert("✅ Data berhasil dikirim!");
       })
       .catch(error => {
-        alert("Gagal mengirim data!");
+        alert("❌ Gagal mengirim data!");
         console.error(error);
       });
+    } else {
+      alert("⏹️ Izin belum dimulai atau sudah selesai.");
     }
   }
 </script>
