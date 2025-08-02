@@ -27,7 +27,6 @@
       max-width: 400px;
       margin: 0 auto;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      max-width: 400px;
     }
 
     label {
@@ -68,35 +67,17 @@
 
   <h1>Form Izin Keluar</h1>
   <form id="izinForm">
-    <label for="jenis">Nama Karyawan:</label>
-    <select id="jenis">
+    <label for="nama">Nama Karyawan:</label>
+    <select id="nama">
       <option value="Pilih Nama">Pilih Nama</option>
       <option value="muhammad alfayet">muhammad alfayet</option>
       <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
       <option value="CUSYATI">CUSYATI</option>
-      <option value="RIZKY HENDRA">RIZKY HENDRA</option>
-      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-      <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
-      <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
-      <option value="HERMAN SUGITO">HERMAN SUGITO</option>
-      <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
-      <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
-      <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
-      <option value="DEDEN SURYANA">DEDEN SURYANA</option>
-      <option value="ARISON">ARISON</option>
-      <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
-      <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
-       <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
-      <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
-      <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
-      <option value="GALANG TRI RISKI ">GALANG TRI RISKI </option>
-      <option value="MALEK RAHMAD">MALEK RAHMAD</option>
-      <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
+      <!-- Tambahkan yang lain sesuai kebutuhan -->
     </select>
-  
-  <form id="izinForm">
-    <label for="jenis">Jenis Izin:</label>
-    <select id="jenis">
+
+    <label for="izin">Jenis Izin:</label>
+    <select id="izin">
       <option value="kamar_mandi">Ke Kamar Mandi</option>
       <option value="membeli_makan">Membeli Makan</option>
       <option value="Merokok">Merokok</option>
@@ -106,30 +87,29 @@
     <button type="button" onclick="selesaiIzin()">Selesai</button>
 
     <div class="timer">Waktu Berjalan: <span id="waktuBerjalan">0 detik</span></div>
-    <div class="duration" id="hasilDurasi"></div>
+    <div class="duration">Durasi Izin: <span id="durasiIzin">0 detik</span></div>
   </form>
 
   <script>
-    
-   let startTime;
-let interval;
-let izinStarted = false;
+    let startTime;
+    let interval;
+    let izinStarted = false;
 
-function mulaiIzin() {
-    if (!izinStarted) {
+    function mulaiIzin() {
+      if (!izinStarted) {
         izinStarted = true;
         startTime = Date.now();
 
         interval = setInterval(() => {
-            const now = Date.now();
-            const elapsed = Math.floor((now - startTime) / 1000);
-            document.getElementById("waktuBerjalan").innerText = `${elapsed} detik`;
+          const now = Date.now();
+          const elapsed = Math.floor((now - startTime) / 1000);
+          document.getElementById("waktuBerjalan").innerText = `${elapsed} detik`;
         }, 1000);
+      }
     }
-}
 
-function selesaiIzin() {
-    if (izinStarted) {
+    function selesaiIzin() {
+      if (izinStarted) {
         izinStarted = false;
         clearInterval(interval);
 
@@ -137,34 +117,32 @@ function selesaiIzin() {
         const durasi = Math.floor((endTime - startTime) / 1000);
         document.getElementById("durasiIzin").innerText = `${durasi} detik`;
 
-        // Kosongkan atau reset tampilan waktu berjalan
+        // Reset tampilan waktu berjalan
         document.getElementById("waktuBerjalan").innerText = `0 detik`;
-    }
-}
 
-       const data = {
-      nama: document.getElementById("nama").value,
-      jenisIzin: document.getElementById("izin").value,
-      durasi: totalSeconds
-    };
+        // Kirim data ke server Google Script / lainnya (opsional)
+        const data = {
+          nama: document.getElementById("nama").value,
+          jenisIzin: document.getElementById("izin").value,
+          durasi: durasi
+        };
 
-    fetch("PASTE_LINK_WEBAPP_DI_SINI", {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
+        fetch("PASTE_LINK_WEBAPP_DI_SINI", {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          }
+        })
+        .then(res => res.json())
+        .then(response => {
+          alert("Data berhasil dikirim!");
+        })
+        .catch(error => {
+          alert("Gagal mengirim data!");
+          console.error(error);
+        });
       }
-    })
-    .then(res => res.json())
-    .then(response => {
-      alert("Data berhasil dikirim!");
-    })
-    .catch(error => {
-      alert("Gagal mengirim data!");
-      console.error(error);
-    });
-  }
-</script>
     }
   </script>
 
