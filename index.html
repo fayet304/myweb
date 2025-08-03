@@ -232,15 +232,20 @@
         });
         localStorage.setItem("historiIzin", JSON.stringify(historiData));
 
-        fetch(SCRIPT_URL, {
+        const formData = new URLSearchParams();
+formData.append("nama", nama);
+formData.append("izin", izin);
+formData.append("mulai", waktu_mulai);
+formData.append("selesai", waktu_selesai);
+formData.append("durasi", durasiText);
+
+fetch(SCRIPT_URL, {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    nama: nama,
-    izin: izin,
-    mulai: waktu_mulai,
-    selesai: waktu_selesai,
-    durasi: durasiText
+  body: formData
+})
+.then(res => res.text())
+.then(data => console.log("Sukses kirim ke Google Sheets:", data))
+.catch(err => console.error("Gagal kirim ke Google Sheets:", err));
   })
 })
 .then(res => res.text())
