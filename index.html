@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Form Izin Keluar</title>
   <style>
     body {
@@ -12,6 +12,7 @@
       background-repeat: no-repeat;
       background-attachment: fixed;
       font-family: Arial, sans-serif;
+      color: #333;
     }
     h1, h2 {
       text-align: center;
@@ -23,7 +24,7 @@
       padding: 20px;
       border-radius: 10px;
       max-width: 420px;
-      margin: 0 auto;
+      margin: 20px auto 30px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       transition: background-color 0.5s ease;
     }
@@ -34,13 +35,16 @@
     select, input, button {
       width: 100%; padding: 10px; margin-bottom: 15px;
       border-radius: 5px; border: 1px solid #ccc;
+      font-size: 1em;
     }
     button {
       background-color: #2c3e50; color: white; cursor: pointer;
       transition: background 0.3s ease;
     }
     button:hover { background-color: #1a252f; }
-    .timer, .duration { text-align: center; font-weight: bold; margin-top: 20px; }
+    .timer, .duration {
+      text-align: center; font-weight: bold; margin-top: 10px; font-size: 1.1em;
+    }
     .timer span { color: #e74c3c; }
     .duration span { color: #27ae60; }
     .peringatan {
@@ -60,11 +64,13 @@
     .status-aktif.hijau { background: #d4edda; color: #155724; }
     .status-aktif.merah { background: #f8d7da; color: #721c24; }
 
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px;}
     table, th, td { border: 1px solid #999; }
-    th, td { padding: 8px; text-align: center; }
-    #histori { max-width: 95%; margin: 30px auto; background: white;
-      padding: 20px; border-radius: 10px; }
+    th, td { padding: 8px; text-align: center; font-size: 0.9em;}
+    #histori, #aktifList {
+      max-width: 95%; margin: 20px auto; background: white;
+      padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
     .status-normal { color: green; font-weight: bold; }
     .status-lebih { color: red; font-weight: bold; }
     .btn-delete {
@@ -81,28 +87,27 @@
     <label for="nama">Nama Karyawan:</label>
     <select id="nama">
       <option value="">Pilih Nama</option>
-      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>					
-      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>					
-      <option value="CUSYATI">CUSYATI</option>					
-      <option value="RIZKY HENDRA">RIZKY HENDRA</option>					
-      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
-      <option value="Cusyati">Cusyati</option>					
-      <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>					
-      <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>					
-      <option value="HERMAN SUGITO">HERMAN SUGITO</option>					
-      <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>					
-      <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>					
-      <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>					
-      <option value="DEDEN SURYANA">DEDEN SURYANA</option>					
-      <option value="ARISON">ARISON</option>					
-      <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>					
-      <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>					
-      <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>					
-      <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>					
-      <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>					
-      <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>					
-      <option value="MALEK RAHMAD">MALEK RAHMAD</option>					
-      <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>					
+      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>
+      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
+      <option value="CUSYATI">CUSYATI</option>
+      <option value="RIZKY HENDRA">RIZKY HENDRA</option>
+      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
+      <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
+      <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
+      <option value="HERMAN SUGITO">HERMAN SUGITO</option>
+      <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
+      <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
+      <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
+      <option value="DEDEN SURYANA">DEDEN SURYANA</option>
+      <option value="ARISON">ARISON</option>
+      <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
+      <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
+      <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
+      <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
+      <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
+      <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
+      <option value="MALEK RAHMAD">MALEK RAHMAD</option>
+      <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -124,10 +129,28 @@
     <div id="peringatanBox" class="peringatan" style="display:none;"></div>
   </form>
 
+  <div id="aktifList">
+    <h2>Izin Sedang Berjalan</h2>
+    <table id="izinAktifTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>Jenis Izin</th>
+          <th>Mulai</th>
+          <th>Durasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data izin aktif akan dimuat di sini -->
+      </tbody>
+    </table>
+  </div>
+
   <div id="histori">
     <h2>Histori Izin</h2>
 
-    <label for="filterNama">Filter Berdasarkan Nama (Dropdown):</label>
+    <label for="filterNama">Filter Berdasarkan Nama:</label>
     <select id="filterNama">
       <option value="all">Semua</option>
       <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>
@@ -157,6 +180,7 @@
 
     <br><br>
     <button onclick="exportToExcel()">Export ke Excel</button>
+
     <table id="historiTabel">
       <thead>
         <tr>
@@ -177,192 +201,258 @@
   <!-- Audio Peringatan -->
   <audio id="notifAudio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUzaxhJfJOnzAUl9qQSTO6dbdNl4OrFORN4HQJNnbGJsU65Tmo9_ymQBr67lRAsTkNg/exec"; 
-    const DELETE_PASSWORD = "12345"; 
-    let startTime, interval;
-    let izinStarted = false;
-    let sudahDiperingatkan = false;
-    let historiData = [];
+<script>
+  // Ganti ini dengan URL Apps Script yang Anda gunakan
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzW8Pdmn7p2Yvw9cf7Or2ZlXP2EE6BT4XmZBqW9d_GdIr3a9xk9zBtqrkm0JSoP_Yr4Pw/exec";
+  const DELETE_PASSWORD = "12345";
 
-    function formatMenitDetik(totalDetik) {
-      const menit = Math.floor(totalDetik / 60);
-      const detik = totalDetik % 60;
-      return `${menit} menit ${detik} detik`;
-    }
+  let startTime, interval;
+  let izinStarted = false;
+  let sudahDiperingatkan = false;
+  let historiData = [];
+  let izinAktifData = [];
 
-    function mulaiTimer() {
-      clearInterval(interval);
-      interval = setInterval(() => {
-        const now = Date.now();
-        const elapsed = Math.floor((now - startTime) / 1000);
-        document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
+  function formatMenitDetik(totalDetik) {
+    const menit = Math.floor(totalDetik / 60);
+    const detik = totalDetik % 60;
+    return `${menit} menit ${detik} detik`;
+  }
 
-        const form = document.getElementById("izinForm");
-        const statusBox = document.getElementById("statusAktif");
+  function mulaiTimer() {
+    clearInterval(interval);
+    interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
 
-        if (elapsed >= 900) {
-          form.classList.remove("aktif");
-          form.classList.add("aktif-lebih");
-          statusBox.className = "status-aktif merah";
-          statusBox.style.display = "block";
-          statusBox.innerText = "⚠️ Izin melewati 15 menit!";
-          if (!sudahDiperingatkan) {
-            sudahDiperingatkan = true;
-            document.getElementById("notifAudio").play();
-            alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
-          }
-        } else {
-          form.classList.add("aktif");
-          form.classList.remove("aktif-lebih");
-          statusBox.className = "status-aktif hijau";
-          statusBox.style.display = "block";
-          statusBox.innerText = "🔔 Izin sedang berlangsung...";
+      const form = document.getElementById("izinForm");
+      const statusBox = document.getElementById("statusAktif");
+
+      if (elapsed >= 900) {
+        form.classList.remove("aktif");
+        form.classList.add("aktif-lebih");
+        statusBox.className = "status-aktif merah";
+        statusBox.style.display = "block";
+        statusBox.innerText = "⚠️ Izin melewati 15 menit!";
+        if (!sudahDiperingatkan) {
+          sudahDiperingatkan = true;
+          document.getElementById("notifAudio").play();
+          alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
         }
-      }, 1000);
-    }
+      } else {
+        form.classList.add("aktif");
+        form.classList.remove("aktif-lebih");
+        statusBox.className = "status-aktif hijau";
+        statusBox.style.display = "block";
+        statusBox.innerText = "🔔 Izin sedang berlangsung...";
+      }
+    }, 1000);
+  }
 
-    function mulaiIzin() {
+  function mulaiIzin() {
+    const nama = document.getElementById("nama").value;
+    const izin = document.getElementById("izin").value;
+    if (!nama || !izin) {
+      alert("⚠️ Silakan pilih nama dan jenis izin terlebih dahulu.");
+      return;
+    }
+    if (!izinStarted) {
+      izinStarted = true;
+      sudahDiperingatkan = false;
+      startTime = Date.now();
+      localStorage.setItem("izinStartTime", startTime);
+      localStorage.setItem("izinStarted", "true");
+      localStorage.setItem("namaDipilih", nama);
+      localStorage.setItem("izinDipilih", izin);
+
+      document.getElementById("peringatanBox").style.display = "none";
+      mulaiTimer();
+
+      // Kirim status izin aktif ke server (add/update izin aktif)
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "start",
+          nama: nama,
+          izin: izin,
+          mulai: new Date(startTime).toISOString()
+        }),
+      }).then(() => ambilIzinAktif());
+    }
+  }
+
+  async function selesaiIzin() {
+    if (izinStarted) {
+      izinStarted = false;
+      clearInterval(interval);
+      localStorage.removeItem("izinStartTime");
+      localStorage.removeItem("izinStarted");
+      localStorage.removeItem("namaDipilih");
+      localStorage.removeItem("izinDipilih");
+
+      const form = document.getElementById("izinForm");
+      form.classList.remove("aktif", "aktif-lebih");
+      document.getElementById("statusAktif").style.display = "none";
+
+      const endTime = Date.now();
+      const durasi = Math.floor((endTime - startTime) / 1000);
+      const durasiText = formatMenitDetik(durasi);
+      document.getElementById("durasiIzin").innerText = durasiText;
+      document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
+
+      const statusText = durasi > 900 ? "⚠️ Melebihi batas waktu" : "✅ Selamat datang kembali";
+      const statusClass = durasi > 900 ? "lebih" : "normal";
+
+      const peringatanBox = document.getElementById("peringatanBox");
+      peringatanBox.style.display = "block";
+      peringatanBox.textContent = statusText;
+      peringatanBox.className = "peringatan " + statusClass;
+
       const nama = document.getElementById("nama").value;
       const izin = document.getElementById("izin").value;
-      if (!nama || !izin) {
-        alert("⚠️ Silakan pilih nama dan jenis izin terlebih dahulu.");
-        return;
-      }
-      if (!izinStarted) {
-        izinStarted = true;
-        sudahDiperingatkan = false;
-        startTime = Date.now();
-        localStorage.setItem("izinStartTime", startTime);
-        localStorage.setItem("izinStarted", "true");
-        localStorage.setItem("namaDipilih", nama);
-        localStorage.setItem("izinDipilih", izin);
+      const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
+      const waktu_selesai = new Date().toLocaleString("id-ID");
 
-        document.getElementById("peringatanBox").style.display = "none";
-        mulaiTimer();
-      }
-    }
-
-    async function selesaiIzin() {
-      if (izinStarted) {
-        izinStarted = false;
-        clearInterval(interval);
-        localStorage.removeItem("izinStartTime");
-        localStorage.removeItem("izinStarted");
-        localStorage.removeItem("namaDipilih");
-        localStorage.removeItem("izinDipilih");
-
-        const form = document.getElementById("izinForm");
-        form.classList.remove("aktif", "aktif-lebih");
-        document.getElementById("statusAktif").style.display = "none";
-
-        const endTime = Date.now();
-        const durasi = Math.floor((endTime - startTime) / 1000);
-        const durasiText = formatMenitDetik(durasi);
-        document.getElementById("durasiIzin").innerText = durasiText;
-        document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
-
-        const statusText = durasi > 900 ? "⚠️ Melebihi batas waktu" : "✅ Selamat datang kembali";
-        const statusClass = durasi > 900 ? "lebih" : "normal";
-
-        const peringatanBox = document.getElementById("peringatanBox");
-        peringatanBox.style.display = "block";
-        peringatanBox.textContent = statusText;
-        peringatanBox.className = "peringatan " + statusClass;
-
-        const nama = document.getElementById("nama").value;
-        const izin = document.getElementById("izin").value;
-        const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
-        const waktu_selesai = new Date().toLocaleString("id-ID");
-
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "add",
-            nama, izin,
-            mulai: waktu_mulai,
-            selesai: waktu_selesai,
-            durasi: durasiText,
-            status: statusText
-          })
-        });
-
-        ambilHistori();
-      }
-    }
-
-    async function hapusHistori(index) {
-      const pass = prompt("Masukkan Password untuk hapus data:");
-      if (pass !== DELETE_PASSWORD) {
-        alert("❌ Password salah!");
-        return;
-      }
+      // Kirim data izin selesai ke server: simpan histori dan hapus izin aktif
       await fetch(SCRIPT_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "delete", index: index, password: pass })
+        body: JSON.stringify({
+          action: "finish",
+          nama,
+          izin,
+          mulai: waktu_mulai,
+          selesai: waktu_selesai,
+          durasi: durasiText,
+          status: statusText
+        })
       });
+
       ambilHistori();
+      ambilIzinAktif();
     }
+  }
 
-    async function ambilHistori() {
-      try {
-        const response = await fetch(SCRIPT_URL);
-        historiData = await response.json();
-        renderHistori();
-      } catch (err) {
-        console.error("Gagal ambil histori:", err);
-      }
+  async function hapusHistori(index) {
+    const pass = prompt("Masukkan Password untuk hapus data:");
+    if (pass !== DELETE_PASSWORD) {
+      alert("❌ Password salah!");
+      return;
     }
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "delete", index: index, password: pass })
+    });
+    ambilHistori();
+  }
 
-    function renderHistori(filterNama = "all") {
-      const tbody = document.querySelector("#historiTabel tbody");
-      tbody.innerHTML = "";
-      historiData
-        .filter(item => filterNama === "all" || item.nama.toLowerCase().includes(filterNama.toLowerCase()))
-        .forEach((item, index) => {
-          const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${item.nama}</td>
-            <td>${item.izin}</td>
-            <td>${item.mulai}</td>
-            <td>${item.selesai}</td>
-            <td>${item.durasi}</td>
-            <td class="${statusClass}">${item.status}</td>
-            <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
-          `;
-          tbody.appendChild(tr);
-      });
+  async function ambilHistori() {
+    try {
+      const response = await fetch(SCRIPT_URL + "?action=histori");
+      historiData = await response.json();
+      renderHistori();
+    } catch (err) {
+      console.error("Gagal ambil histori:", err);
     }
+  }
 
-    function cariHistori() {
-      renderHistori(document.getElementById("filterNama").value);
+  function renderHistori(filterNama = "all") {
+    const tbody = document.querySelector("#historiTabel tbody");
+    tbody.innerHTML = "";
+    historiData
+      .filter(item => filterNama === "all" || item.nama.toLowerCase() === filterNama.toLowerCase())
+      .forEach((item, index) => {
+        const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${item.nama}</td>
+          <td>${item.izin}</td>
+          <td>${item.mulai}</td>
+          <td>${item.selesai}</td>
+          <td>${item.durasi}</td>
+          <td class="${statusClass}">${item.status}</td>
+          <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+  }
+
+  function cariHistori() {
+    renderHistori(document.getElementById("filterNama").value);
+  }
+
+  function exportToExcel() {
+    const table = document.getElementById("historiTabel");
+    const html = table.outerHTML.replace(/ /g, '%20');
+    const filename = 'Histori_Izin.xls';
+    const link = document.createElement('a');
+    link.href = 'data:application/vnd.ms-excel,' + html;
+    link.download = filename;
+    link.click();
+  }
+
+  // Ambil izin aktif (sedang berjalan) dari server
+  async function ambilIzinAktif() {
+    try {
+      const response = await fetch(SCRIPT_URL + "?action=aktif");
+      izinAktifData = await response.json();
+      renderIzinAktif();
+    } catch (err) {
+      console.error("Gagal ambil izin aktif:", err);
     }
+  }
 
-    function exportToExcel() {
-      const table = document.getElementById("historiTabel");
-      const html = table.outerHTML.replace(/ /g, '%20');
-      const filename = 'Histori_Izin.xls';
-      const link = document.createElement('a');
-      link.href = 'data:application/vnd.ms-excel,' + html;
-      link.download = filename;
-      link.click();
+  // Render tabel izin aktif
+  function renderIzinAktif() {
+    const tbody = document.querySelector("#izinAktifTable tbody");
+    tbody.innerHTML = "";
+    izinAktifData.forEach((item, index) => {
+      const mulaiTimestamp = new Date(item.mulai).getTime();
+      const now = Date.now();
+      const durasiDetik = Math.floor((now - mulaiTimestamp) / 1000);
+      const durasiText = formatMenitDetik(durasiDetik);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${item.nama}</td>
+        <td>${item.izin}</td>
+        <td>${new Date(item.mulai).toLocaleString("id-ID")}</td>
+        <td>${durasiText}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Update durasi izin aktif tiap detik
+  setInterval(() => {
+    if (izinAktifData.length > 0) {
+      renderIzinAktif();
     }
+    // Update juga timer lokal jika ada izin aktif lokal
+    if (izinStarted) {
+      const now = Date.now();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
+    }
+  }, 1000);
 
-    window.onload = () => {
-      ambilHistori();
-      const savedNama = localStorage.getItem("namaDipilih");
-      const savedIzin = localStorage.getItem("izinDipilih");
-      if (savedNama) document.getElementById("nama").value = savedNama;
-      if (savedIzin) document.getElementById("izin").value = savedIzin;
-      if (localStorage.getItem("izinStarted") === "true") {
-        startTime = parseInt(localStorage.getItem("izinStartTime"));
-        izinStarted = true;
-        sudahDiperingatkan = false;
-        mulaiTimer();
-      }
-    };
-  </script>
+  window.onload = () => {
+    ambilHistori();
+    ambilIzinAktif();
+
+    const savedNama = localStorage.getItem("namaDipilih");
+    const savedIzin = localStorage.getItem("izinDipilih");
+    if (savedNama) document.getElementById("nama").value = savedNama;
+    if (savedIzin) document.getElementById("izin").value = savedIzin;
+    if (localStorage.getItem("izinStarted") === "true") {
+      startTime = parseInt(localStorage.getItem("izinStartTime"));
+      izinStarted = true;
+      sudahDiperingatkan = false;
+      mulaiTimer();
+    }
+  };
+</script>
+
 </body>
 </html>
