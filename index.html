@@ -67,28 +67,26 @@
     <select id="nama">
       <option value="">Pilih Nama</option>
       <option value="Muhammad Alfayet">Muhammad Alfayet</option>
-<option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
-<option value="Cusyati">Cusyati</option>
-<option value="RIZKY HENDRA">RIZKY HENDRA</option>
-<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-<option value="Cusyati">Cusyati</option>
-<option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
-<option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
-<option value="HERMAN SUGITO">HERMAN SUGITO</option>
-<option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
-<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-<option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
-<option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
-<option value="DEDEN SURYANA">DEDEN SURYANA</option>
-<option value="ARISON">ARISON</option>
-<option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
-<option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
-<option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
-<option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
-<option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
-<option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
-<option value="MALEK RAHMAD">MALEK RAHMAD</option>
-<option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
+      <option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
+      <option value="Cusyati">Cusyati</option>
+      <option value="Rizky Hendra">Rizky Hendra</option>
+      <option value="Putri Aji Meinasari">Putri Aji Meinasari</option>
+      <option value="Yusril Ardiansyah">Yusril Ardiansyah</option>
+      <option value="Indah Wulan Juli">Indah Wulan Juli</option>
+      <option value="Herman Sugito">Herman Sugito</option>
+      <option value="Jefri Suprianto">Jefri Suprianto</option>
+      <option value="Difi Zianka Listiawan">Difi Zianka Listiawan</option>
+      <option value="Muhammad Nurhadi">Muhammad Nurhadi</option>
+      <option value="Deden Suryana">Deden Suryana</option>
+      <option value="Arison">Arison</option>
+      <option value="Angel Kusnita Permata Dewi">Angel Kusnita Permata Dewi</option>
+      <option value="Agung Rafiansyah">Agung Rafiansyah</option>
+      <option value="Sarah Sitompul">Sarah Sitompul</option>
+      <option value="Aurel Adhitya Andik">Aurel Adhitya Andik</option>
+      <option value="Saipul Bahri Siregar">Saipul Bahri Siregar</option>
+      <option value="Galang Tri Riski">Galang Tri Riski</option>
+      <option value="Malek Rahmad">Malek Rahmad</option>
+      <option value="Arik Dinata Kusuma">Arik Dinata Kusuma</option>
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -135,7 +133,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJGdPMLXy3UQHejnHVZyHgRzz4EInUrST0vLso36WyO5ni9qgayaJI3D3c59Nbt3Mg/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA56Wt1cSYY4Ir-X1r4xy2sTJlvzfzziWFO-H1RJ9FQup5OR58cVfxuWaUU9PMZUxj/exec"; 
     const DELETE_PASSWORD = "12345"; 
     let startTime, interval;
     let izinStarted = false;
@@ -200,6 +198,8 @@
             status: statusText
           })
         });
+
+        ambilHistori();
       }
     }
 
@@ -224,12 +224,18 @@
       const tbody = document.querySelector("#historiTabel tbody");
       tbody.innerHTML = "";
 
-      historiData
-        .filter(item => 
-          item.nama.toLowerCase().includes(namaFilter) &&
-          item.mulai.startsWith(new Date(tanggalFilter).toLocaleDateString("id-ID"))
-        )
-        .forEach((item, index) => {
+      const tanggalFilterID = new Date(tanggalFilter).toLocaleDateString("id-ID");
+
+      const hasil = historiData.filter(item => {
+        const tanggalItem = item.mulai.split(" ")[0];
+        return item.nama.toLowerCase().includes(namaFilter) &&
+               tanggalItem === tanggalFilterID;
+      });
+
+      if (hasil.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8">❌ Tidak ada data ditemukan</td></tr>`;
+      } else {
+        hasil.forEach((item, index) => {
           const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -243,7 +249,8 @@
             <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
           `;
           tbody.appendChild(tr);
-      });
+        });
+      }
 
       document.getElementById("histori").style.display = "block";
     }
