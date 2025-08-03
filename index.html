@@ -27,7 +27,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     label { display: block; margin: 10px 0 5px; }
-    select, button {
+    select, input, button {
       width: 100%; padding: 10px; margin-bottom: 15px;
       border-radius: 5px; border: 1px solid #ccc;
     }
@@ -66,29 +66,30 @@
     <label for="nama">Nama Karyawan:</label>
     <select id="nama">
       <option value="">Pilih Nama</option>
-      <option value="Muhammad Alfayet">Muhammad Alfayet</option>
-      <option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
-      <option value="Cusyati">Cusyati</option>
-      <option value="RIZKY HENDRA">RIZKY HENDRA</option>
-      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-      <option value="Cusyati">Cusyati</option>
-      <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
-      <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
-      <option value="HERMAN SUGITO">HERMAN SUGITO</option>
-      <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
-      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-      <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
-      <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
-      <option value="DEDEN SURYANA">DEDEN SURYANA</option>
-      <option value="ARISON">ARISON</option>
-      <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
-      <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
-      <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
-      <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
-      <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
-      <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
-      <option value="MALEK RAHMAD">MALEK RAHMAD</option>
-      <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
+      <option value="Muhammad Alfayet">Muhammad Alfayet</option>					
+<option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>					
+<option value="Cusyati">Cusyati</option>					
+<option value="RIZKY HENDRA">RIZKY HENDRA</option>					
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
+<option value="Cusyati">Cusyati</option>					
+<option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>					
+<option value="INDAH WULAN JULI">INDAH WULAN JULI</option>					
+<option value="HERMAN SUGITO">HERMAN SUGITO</option>					
+<option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>					
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
+<option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>					
+<option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>					
+<option value="DEDEN SURYANA">DEDEN SURYANA</option>					
+<option value="ARISON">ARISON</option>					
+<option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>					
+<option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>					
+<option value="SARAH SITOMPUL">SARAH SITOMPUL</option>					
+<option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>					
+<option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>					
+<option value="GALANG TRI RISKI">GALANG TRI RISKI</option>					
+<option value="MALEK RAHMAD">MALEK RAHMAD</option>					
+<option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>					
+</select>					
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -110,13 +111,20 @@
 
   <div id="histori">
     <h2>Histori Izin</h2>
-    <label for="filterNama">Filter Berdasarkan Nama:</label>
-    <select id="filterNama" onchange="renderHistori()">
+
+    <label for="filterNama">Filter Berdasarkan Nama (Dropdown):</label>
+    <select id="filterNama">
       <option value="all">Semua</option>
       <option value="Muhammad Alfayet">Muhammad Alfayet</option>
       <option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
       <option value="Cusyati">Cusyati</option>
     </select>
+
+    <br><br>
+    <label for="searchNama">Atau ketik nama sendiri:</label>
+    <input type="text" id="searchNama" placeholder="Ketik Nama Karyawan">
+    <button type="button" onclick="cariHistori()">Tampilkan Riwayat</button>
+
     <br><br>
     <button onclick="exportToExcel()">Export ke Excel</button>
     <table id="historiTabel">
@@ -137,8 +145,8 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxuFc56HTmkw7R0Jv3yRhSbYHOGGGM4NofcnipK5rqk_VDQVQPDQhZDdI49rj19jnq5/exec"; // ganti dengan URL Web App Google Apps Script
-    const DELETE_PASSWORD = "12345"; // ganti password sesuai kebutuhan
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxlctfptXA-0bv6LJ_HjVJ14DMWkQ6jOX5lDS6xrqk1sx_RVE1HcM5enqZM2IYWALK/exec"; 
+    const DELETE_PASSWORD = "12345"; 
     let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
@@ -236,12 +244,11 @@
       }
     }
 
-    function renderHistori() {
-      const filterNama = document.getElementById("filterNama").value;
+    function renderHistori(filterNama = "all") {
       const tbody = document.querySelector("#historiTabel tbody");
       tbody.innerHTML = "";
       historiData
-        .filter(item => filterNama === "all" || item.nama === filterNama)
+        .filter(item => filterNama === "all" || item.nama.toLowerCase().includes(filterNama.toLowerCase()))
         .forEach((item, index) => {
           const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
           const tr = document.createElement("tr");
@@ -257,6 +264,15 @@
           `;
           tbody.appendChild(tr);
       });
+    }
+
+    function cariHistori() {
+      const typedName = document.getElementById("searchNama").value.trim();
+      if (typedName) {
+        renderHistori(typedName);
+      } else {
+        renderHistori(document.getElementById("filterNama").value);
+      }
     }
 
     function exportToExcel() {
