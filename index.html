@@ -115,9 +115,9 @@
     <label for="nama">Nama Karyawan:</label>
     <select id="nama">
       <option value="">Pilih Nama</option>
-      <option value="muhammad alfayet">muhammad alfayet</option>
-      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
-      <option value="CUSYATI">CUSYATI</option>
+      <option value="Muhammad Alfayet">Muhammad Alfayet</option>
+      <option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
+      <option value="Cusyati">Cusyati</option>
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -142,9 +142,9 @@
     <label for="filterNama">Filter Berdasarkan Nama:</label>
     <select id="filterNama" onchange="renderHistori()">
       <option value="all">Semua</option>
-      <option value="muhammad alfayet">muhammad alfayet</option>
-      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
-      <option value="CUSYATI">CUSYATI</option>
+      <option value="Muhammad Alfayet">Muhammad Alfayet</option>
+      <option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
+      <option value="Cusyati">Cusyati</option>
     </select>
     <br><br>
     <button onclick="exportToExcel()">Export ke Excel</button>
@@ -158,7 +158,6 @@
           <th>Selesai</th>
           <th>Durasi</th>
           <th>Status</th>
-          <th>Aksi</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -166,12 +165,11 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7auM29Rdt4qkkQowEJaxPBtcWTKHgEHEwXwPxkxFRHC7HABeaVkXjIZtaV-kfuZKr/exec";
-    const DELETE_PASSWORD = "12345"; // ubah password sesuai kebutuhan
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxll7nD3WN6C6odtwyu9UPcJA_DZvWyAMheiEm32_qd_q4XQWRU0kMruHE4TnyhTT_g/exec"; 
     let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
-    let historiData = JSON.parse(localStorage.getItem("historiIzin") || "[]");
+    let historiData = [];
 
     function formatMenitDetik(totalDetik) {
       const menit = Math.floor(totalDetik / 60);
@@ -203,7 +201,7 @@
       }
     }
 
-    function selesaiIzin() {
+    async function selesaiIzin() {
       if (izinStarted) {
         izinStarted = false;
         clearInterval(interval);
@@ -214,28 +212,36 @@
         document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
         const peringatanBox = document.getElementById("peringatanBox");
         peringatanBox.style.display = "block";
-        let statusClass = "", statusText = "";
-        if (durasi > 900) {
-          statusText = "⚠️ Lebih Waktu Izin";
-          statusClass = "status-lebih";
-          peringatanBox.textContent = statusText;
-          peringatanBox.className = "peringatan lebih";
-        } else {
-          statusText = "✅ Selamat";
-          statusClass = "status-normal";
-          peringatanBox.textContent = statusText;
-          peringatanBox.className = "peringatan normal";
-        }
+        let statusText = durasi > 900 ? "⚠️ Lebih Waktu Izin" : "✅ Selamat";
+        peringatanBox.textContent = statusText;
+        peringatanBox.className = "peringatan " + (durasi > 900 ? "lebih" : "normal");
         const nama = document.getElementById("nama").value;
         const izin = document.getElementById("izin").value;
         const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
         const waktu_selesai = new Date().toLocaleString("id-ID");
-        historiData.push({
-          nama, izin, mulai: waktu_mulai, selesai: waktu_selesai,
-          durasi: durasiText, status: {text: statusText, class: statusClass}
+
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            nama, izin,
+            mulai: waktu_mulai,
+            selesai: waktu_selesai,
+            durasi: durasiText,
+            status: statusText
+          })
         });
-        localStorage.setItem("historiIzin", JSON.stringify(historiData));
+
+        ambilHistori();
+      }
+    }
+
+    async function ambilHistori() {
+      try {
+        const response = await fetch(SCRIPT_URL);
+        historiData = await response.json();
         renderHistori();
+      } catch (err) {
+        console.error("Gagal ambil histori:", err);
       }
     }
 
@@ -254,23 +260,10 @@
             <td>${item.mulai}</td>
             <td>${item.selesai}</td>
             <td>${item.durasi}</td>
-            <td class="${item.status.class}">${item.status.text}</td>
-            <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
+            <td class="${item.status.includes("Lebih") ? "status-lebih" : "status-normal"}">${item.status}</td>
           `;
           tbody.appendChild(tr);
       });
-    }
-
-    function hapusHistori(index) {
-      const pass = prompt("Masukkan Password untuk hapus data:");
-      if (pass === DELETE_PASSWORD) {
-        historiData.splice(index, 1);
-        localStorage.setItem("historiIzin", JSON.stringify(historiData));
-        renderHistori();
-        alert("✅ Data berhasil dihapus!");
-      } else {
-        alert("❌ Password salah!");
-      }
     }
 
     function exportToExcel() {
@@ -283,7 +276,7 @@
       link.click();
     }
 
-    window.onload = renderHistori;
+    window.onload = ambilHistori;
   </script>
 </body>
 </html>
