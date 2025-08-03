@@ -112,6 +112,15 @@
       color: #c0392b;
       font-weight: bold;
     }
+
+    .btn-danger {
+      background-color: #c0392b;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #922b21;
+    }
   </style>
 </head>
 <body>
@@ -146,6 +155,7 @@
   <div id="histori">
     <h2>Histori Izin</h2>
     <button onclick="exportToExcel()">Export ke Excel</button>
+    <button class="btn-danger" onclick="hapusHistori()">Hapus Semua Histori</button>
     <table id="historiTabel">
       <thead>
         <tr>
@@ -237,7 +247,6 @@
         const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
         const waktu_selesai = new Date().toLocaleString("id-ID");
 
-        // simpan ke array lokal
         historiData.push({
           nama,
           izin,
@@ -278,6 +287,14 @@
       link.href = 'data:application/vnd.ms-excel,' + html;
       link.download = filename;
       link.click();
+    }
+
+    function hapusHistori() {
+      if (confirm("⚠️ Apakah Anda yakin ingin menghapus semua histori izin?")) {
+        historiData = [];
+        localStorage.removeItem("historiIzin");
+        renderHistori();
+      }
     }
 
     window.onload = renderHistori;
