@@ -102,25 +102,6 @@
       padding: 20px;
       border-radius: 10px;
     }
-
-    .status-normal {
-      color: #2ecc71;
-      font-weight: bold;
-    }
-
-    .status-lebih {
-      color: #c0392b;
-      font-weight: bold;
-    }
-
-    .btn-danger {
-      background-color: #c0392b;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background-color: #922b21;
-    }
   </style>
 </head>
 <body>
@@ -155,7 +136,6 @@
   <div id="histori">
     <h2>Histori Izin</h2>
     <button onclick="exportToExcel()">Export ke Excel</button>
-    <button class="btn-danger" onclick="hapusHistori()">Hapus Semua Histori</button>
     <table id="historiTabel">
       <thead>
         <tr>
@@ -165,7 +145,6 @@
           <th>Mulai</th>
           <th>Selesai</th>
           <th>Durasi</th>
-          <th>Status</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -173,6 +152,9 @@
   </div>
 
   <script>
+    // jika ingin simpan ke Google Sheet, ganti URL di sini
+    const SCRIPT_URL = ""; 
+
     let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
@@ -227,18 +209,11 @@
         const peringatanBox = document.getElementById("peringatanBox");
         peringatanBox.style.display = "block";
 
-        let statusText = "";
-        let statusClass = "";
-
         if (durasi > 900) {
-          statusText = "⚠️ Anda telah melebihi batas waktu izin";
-          statusClass = "status-lebih";
-          peringatanBox.textContent = statusText;
+          peringatanBox.textContent = "⚠️ PERHATIAN: Anda telah melebihi batas waktu izin 15 menit!";
           peringatanBox.className = "peringatan lebih";
         } else {
-          statusText = "✅ Selamat datang kembali!";
-          statusClass = "status-normal";
-          peringatanBox.textContent = statusText;
+          peringatanBox.textContent = "✅ Selamat datang kembali!";
           peringatanBox.className = "peringatan normal";
         }
 
@@ -247,13 +222,13 @@
         const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
         const waktu_selesai = new Date().toLocaleString("id-ID");
 
+        // simpan ke array lokal
         historiData.push({
           nama,
           izin,
           mulai: waktu_mulai,
           selesai: waktu_selesai,
-          durasi: durasiText,
-          status: { text: statusText, class: statusClass }
+          durasi: durasiText
         });
         localStorage.setItem("historiIzin", JSON.stringify(historiData));
 
@@ -264,12 +239,6 @@
     function renderHistori() {
       const tbody = document.querySelector("#historiTabel tbody");
       tbody.innerHTML = "";
-
-      if (historiData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7">Belum ada data izin</td></tr>`;
-        return;
-      }
-
       historiData.forEach((item, index) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -279,7 +248,6 @@
           <td>${item.mulai}</td>
           <td>${item.selesai}</td>
           <td>${item.durasi}</td>
-          <td class="${item.status.class}">${item.status.text}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -293,14 +261,6 @@
       link.href = 'data:application/vnd.ms-excel,' + html;
       link.download = filename;
       link.click();
-    }
-
-    function hapusHistori() {
-      if (confirm("⚠️ Apakah Anda yakin ingin menghapus semua histori izin?")) {
-        historiData = [];
-        localStorage.removeItem("historiIzin");
-        renderHistori();
-      }
     }
 
     window.onload = renderHistori;
