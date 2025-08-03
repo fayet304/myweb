@@ -232,6 +232,21 @@
         });
         localStorage.setItem("historiIzin", JSON.stringify(historiData));
 
+        fetch(SCRIPT_URL, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    nama: nama,
+    izin: izin,
+    mulai: waktu_mulai,
+    selesai: waktu_selesai,
+    durasi: durasiText
+  })
+})
+.then(res => res.text())
+.then(data => console.log("Sukses kirim ke Google Sheets:", data))
+.catch(err => console.error("Gagal kirim ke Google Sheets:", err));
+        
         renderHistori();
       }
     }
