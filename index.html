@@ -87,6 +87,25 @@
       padding: 20px;
       border-radius: 10px;
     }
+    .status-normal {
+      color: green;
+      font-weight: bold;
+    }
+    .status-lebih {
+      color: red;
+      font-weight: bold;
+    }
+    .btn-delete {
+      background-color: #c0392b;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-delete:hover {
+      background-color: #922b21;
+    }
   </style>
 </head>
 <body>
@@ -120,6 +139,14 @@
 
   <div id="histori">
     <h2>Histori Izin</h2>
+    <label for="filterNama">Filter Berdasarkan Nama:</label>
+    <select id="filterNama" onchange="renderHistori()">
+      <option value="all">Semua</option>
+      <option value="muhammad alfayet">muhammad alfayet</option>
+      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
+      <option value="CUSYATI">CUSYATI</option>
+    </select>
+    <br><br>
     <button onclick="exportToExcel()">Export ke Excel</button>
     <table id="historiTabel">
       <thead>
@@ -130,6 +157,8 @@
           <th>Mulai</th>
           <th>Selesai</th>
           <th>Durasi</th>
+          <th>Status</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -138,6 +167,7 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7auM29Rdt4qkkQowEJaxPBtcWTKHgEHEwXwPxkxFRHC7HABeaVkXjIZtaV-kfuZKr/exec";
+    const DELETE_PASSWORD = "12345"; // ubah password sesuai kebutuhan
     let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
@@ -152,23 +182,19 @@
     function mulaiIzin() {
       const nama = document.getElementById("nama").value;
       const izin = document.getElementById("izin").value;
-
       if (!nama || !izin) {
         alert("⚠️ Silakan pilih nama dan jenis izin terlebih dahulu.");
         return;
       }
-
       if (!izinStarted) {
         izinStarted = true;
         sudahDiperingatkan = false;
         startTime = Date.now();
         document.getElementById("peringatanBox").style.display = "none";
-
         interval = setInterval(() => {
           const now = Date.now();
           const elapsed = Math.floor((now - startTime) / 1000);
           document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
-
           if (elapsed >= 900 && !sudahDiperingatkan) {
             sudahDiperingatkan = true;
             alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
@@ -181,74 +207,70 @@
       if (izinStarted) {
         izinStarted = false;
         clearInterval(interval);
-
         const endTime = Date.now();
         const durasi = Math.floor((endTime - startTime) / 1000);
         const durasiText = formatMenitDetik(durasi);
-
         document.getElementById("durasiIzin").innerText = durasiText;
         document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
-
         const peringatanBox = document.getElementById("peringatanBox");
         peringatanBox.style.display = "block";
-
+        let statusClass = "", statusText = "";
         if (durasi > 900) {
-          peringatanBox.textContent = "⚠️ PERHATIAN: Anda telah melebihi batas waktu izin 15 menit!";
+          statusText = "⚠️ Lebih Waktu Izin";
+          statusClass = "status-lebih";
+          peringatanBox.textContent = statusText;
           peringatanBox.className = "peringatan lebih";
         } else {
-          peringatanBox.textContent = "✅ Selamat datang kembali!";
+          statusText = "✅ Selamat";
+          statusClass = "status-normal";
+          peringatanBox.textContent = statusText;
           peringatanBox.className = "peringatan normal";
         }
-
         const nama = document.getElementById("nama").value;
         const izin = document.getElementById("izin").value;
         const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
         const waktu_selesai = new Date().toLocaleString("id-ID");
-
-        // Simpan lokal
         historiData.push({
-          nama,
-          izin,
-          mulai: waktu_mulai,
-          selesai: waktu_selesai,
-          durasi: durasiText
+          nama, izin, mulai: waktu_mulai, selesai: waktu_selesai,
+          durasi: durasiText, status: {text: statusText, class: statusClass}
         });
         localStorage.setItem("historiIzin", JSON.stringify(historiData));
         renderHistori();
-
-        // Kirim ke Google Sheet tanpa CORS error
-        const formData = new URLSearchParams();
-        formData.append("nama", nama);
-        formData.append("izin", izin);
-        formData.append("mulai", waktu_mulai);
-        formData.append("selesai", waktu_selesai);
-        formData.append("durasi", durasiText);
-
-        fetch(SCRIPT_URL, {
-          method: "POST",
-          body: formData
-        })
-        .then(res => res.text())
-        .then(data => console.log("✅ Sukses kirim ke Google Sheets:", data))
-        .catch(err => console.error("❌ Gagal kirim ke Google Sheets:", err));
       }
     }
 
     function renderHistori() {
+      const filterNama = document.getElementById("filterNama").value;
       const tbody = document.querySelector("#historiTabel tbody");
       tbody.innerHTML = "";
-      historiData.forEach((item, index) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${item.nama}</td>
-          <td>${item.izin}</td>
-          <td>${item.mulai}</td>
-          <td>${item.selesai}</td>
-          <td>${item.durasi}</td>
-        `;
-        tbody.appendChild(tr);
+      historiData
+        .filter(item => filterNama === "all" || item.nama === filterNama)
+        .forEach((item, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.nama}</td>
+            <td>${item.izin}</td>
+            <td>${item.mulai}</td>
+            <td>${item.selesai}</td>
+            <td>${item.durasi}</td>
+            <td class="${item.status.class}">${item.status.text}</td>
+            <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
+          `;
+          tbody.appendChild(tr);
       });
+    }
+
+    function hapusHistori(index) {
+      const pass = prompt("Masukkan Password untuk hapus data:");
+      if (pass === DELETE_PASSWORD) {
+        historiData.splice(index, 1);
+        localStorage.setItem("historiIzin", JSON.stringify(historiData));
+        renderHistori();
+        alert("✅ Data berhasil dihapus!");
+      } else {
+        alert("❌ Password salah!");
+      }
     }
 
     function exportToExcel() {
@@ -265,18 +287,3 @@
   </script>
 </body>
 </html>
-✅ Apps Script doPost(e) (copy-paste ke script Google Sheets):
-javascript
-Copy
-Edit
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  sheet.appendRow([
-    e.parameter.nama,
-    e.parameter.izin,
-    e.parameter.mulai,
-    e.parameter.selesai,
-    e.parameter.durasi
-  ]);
-  return ContentService.createTextOutput("Sukses").setMimeType(ContentService.MimeType.TEXT);
-}
