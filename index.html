@@ -120,7 +120,7 @@
     <select id="izin">
       <option value="">Pilih Jenis Izin</option>
       <option value="Toilet">Toilet</option>
-      <option value="membeli_makan">Membeli Makan</option>
+      <option value="Membeli Makan">Membeli Makan</option>
       <option value="Merokok">Merokok</option>
     </select>
 
@@ -152,11 +152,13 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec"; // GANTI URL DI SINI
+    // jika ingin simpan ke Google Sheet, ganti URL di sini
+    const SCRIPT_URL = ""; 
 
     let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
+    let historiData = JSON.parse(localStorage.getItem("historiIzin") || "[]");
 
     function formatMenitDetik(totalDetik) {
       const menit = Math.floor(totalDetik / 60);
@@ -219,43 +221,36 @@
         const izin = document.getElementById("izin").value;
         const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
         const waktu_selesai = new Date().toLocaleString("id-ID");
-        const durasiStr = durasiText;
 
-        fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            data: [{
-              nama, izin, waktu_mulai, waktu_selesai, durasi: durasiStr
-            }]
-          })
-        })
-        .then(res => res.json())
-        .then(() => {
-          loadHistori();
+        // simpan ke array lokal
+        historiData.push({
+          nama,
+          izin,
+          mulai: waktu_mulai,
+          selesai: waktu_selesai,
+          durasi: durasiText
         });
+        localStorage.setItem("historiIzin", JSON.stringify(historiData));
+
+        renderHistori();
       }
     }
 
-    function loadHistori() {
-      fetch(SCRIPT_URL)
-        .then(res => res.json())
-        .then(data => {
-          const tbody = document.querySelector("#historiTabel tbody");
-          tbody.innerHTML = "";
-          data.forEach((item, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${index + 1}</td>
-              <td>${item.nama}</td>
-              <td>${item.izin}</td>
-              <td>${item.mulai}</td>
-              <td>${item.selesai}</td>
-              <td>${item.durasi}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        });
+    function renderHistori() {
+      const tbody = document.querySelector("#historiTabel tbody");
+      tbody.innerHTML = "";
+      historiData.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${item.nama}</td>
+          <td>${item.izin}</td>
+          <td>${item.mulai}</td>
+          <td>${item.selesai}</td>
+          <td>${item.durasi}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function exportToExcel() {
@@ -268,7 +263,7 @@
       link.click();
     }
 
-    window.onload = loadHistori;
+    window.onload = renderHistori;
   </script>
 </body>
 </html>
