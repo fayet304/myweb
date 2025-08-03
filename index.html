@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Form Izin Keluar & Pencarian Histori</title>
+  <title>Form Izin Keluar</title>
   <style>
     body {
       background: url('bck.png');
@@ -13,32 +13,43 @@
       background-attachment: fixed;
       font-family: Arial, sans-serif;
     }
-    h1, h2 { text-align: center; color: #fff; text-shadow: 1px 1px 4px #000; }
+    h1, h2 {
+      text-align: center;
+      color: #fff;
+      text-shadow: 1px 1px 4px #000;
+    }
     form {
-      background: rgba(255, 255, 255, 0.95); padding: 20px;
-      border-radius: 10px; max-width: 500px; margin: 20px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 420px;
+      margin: 0 auto;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     label { display: block; margin: 10px 0 5px; }
-    select, input, button { width: 100%; padding: 10px; margin-bottom: 15px;
-      border-radius: 5px; border: 1px solid #ccc; }
-    button { background-color: #2c3e50; color: white; cursor: pointer;
-      transition: background 0.3s ease; }
+    select, input, button {
+      width: 100%; padding: 10px; margin-bottom: 15px;
+      border-radius: 5px; border: 1px solid #ccc;
+    }
+    button {
+      background-color: #2c3e50; color: white; cursor: pointer;
+      transition: background 0.3s ease;
+    }
     button:hover { background-color: #1a252f; }
-    .timer, .duration { text-align: center; font-weight: bold; margin: 10px 0; }
+    .timer, .duration { text-align: center; font-weight: bold; margin-top: 20px; }
     .timer span { color: #e74c3c; }
     .duration span { color: #27ae60; }
     .peringatan {
-      margin-top: 10px; text-align: center; font-size: 1.1em;
+      margin-top: 20px; text-align: center; font-size: 1.2em;
       font-weight: bold; padding: 10px; border-radius: 5px;
     }
     .peringatan.lebih { background-color: #ffcccc; color: #c0392b; }
     .peringatan.normal { background-color: #ccffcc; color: #2ecc71; }
-    #histori { max-width: 95%; margin: 30px auto; background: white;
-      padding: 20px; border-radius: 10px; }
     table { width: 100%; border-collapse: collapse; }
     table, th, td { border: 1px solid #999; }
     th, td { padding: 8px; text-align: center; }
+    #histori { max-width: 95%; margin: 30px auto; background: white;
+      padding: 20px; border-radius: 10px; display:none; }
     .status-normal { color: green; font-weight: bold; }
     .status-lebih { color: red; font-weight: bold; }
     .btn-delete {
@@ -55,30 +66,29 @@
     <label for="nama">Nama Karyawan:</label>
     <select id="nama">
       <option value="">Pilih Nama</option>
-      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>					
-<option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>					
-<option value="CUSYATI">CUSYATI</option>					
-<option value="RIZKY HENDRA">RIZKY HENDRA</option>					
-<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
-<option value="Cusyati">Cusyati</option>					
-<option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>					
-<option value="INDAH WULAN JULI">INDAH WULAN JULI</option>					
-<option value="HERMAN SUGITO">HERMAN SUGITO</option>					
-<option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>					
-<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
-<option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>					
-<option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>					
-<option value="DEDEN SURYANA">DEDEN SURYANA</option>					
-<option value="ARISON">ARISON</option>					
-<option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>					
-<option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>					
-<option value="SARAH SITOMPUL">SARAH SITOMPUL</option>					
-<option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>					
-<option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>					
-<option value="GALANG TRI RISKI">GALANG TRI RISKI</option>					
-<option value="MALEK RAHMAD">MALEK RAHMAD</option>					
-<option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>					
-</select>					
+      <option value="Muhammad Alfayet">Muhammad Alfayet</option>
+<option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
+<option value="Cusyati">Cusyati</option>
+<option value="RIZKY HENDRA">RIZKY HENDRA</option>
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
+<option value="Cusyati">Cusyati</option>
+<option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
+<option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
+<option value="HERMAN SUGITO">HERMAN SUGITO</option>
+<option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
+<option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
+<option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
+<option value="DEDEN SURYANA">DEDEN SURYANA</option>
+<option value="ARISON">ARISON</option>
+<option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
+<option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
+<option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
+<option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
+<option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
+<option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
+<option value="MALEK RAHMAD">MALEK RAHMAD</option>
+<option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -100,40 +110,11 @@
 
   <div id="histori">
     <h2>Histori Izin</h2>
-
-    <label for="filterNama">Filter Berdasarkan Nama (Dropdown):</label>
-    <select id="filterNama">
-      <option value="all">Semua</option>
-      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>					
-<option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>					
-<option value="CUSYATI">CUSYATI</option>					
-<option value="RIZKY HENDRA">RIZKY HENDRA</option>					
-<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
-<option value="Cusyati">Cusyati</option>					
-<option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>					
-<option value="INDAH WULAN JULI">INDAH WULAN JULI</option>					
-<option value="HERMAN SUGITO">HERMAN SUGITO</option>					
-<option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>					
-<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
-<option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>					
-<option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>					
-<option value="DEDEN SURYANA">DEDEN SURYANA</option>					
-<option value="ARISON">ARISON</option>					
-<option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>					
-<option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>					
-<option value="SARAH SITOMPUL">SARAH SITOMPUL</option>					
-<option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>					
-<option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>					
-<option value="GALANG TRI RISKI">GALANG TRI RISKI</option>					
-<option value="MALEK RAHMAD">MALEK RAHMAD</option>					
-<option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
-    </select>
-
-    <br><br>
-    <label for="searchNama">Atau ketik nama sendiri:</label>
-    <input type="text" id="searchNama" placeholder="Ketik Nama Karyawan">
+    <label for="filterNama">Nama Karyawan:</label>
+    <input type="text" id="filterNama" placeholder="Ketik Nama Karyawan">
+    <label for="filterTanggal">Tanggal (YYYY-MM-DD):</label>
+    <input type="date" id="filterTanggal">
     <button type="button" onclick="cariHistori()">Tampilkan Riwayat</button>
-
     <br><br>
     <button onclick="exportToExcel()">Export ke Excel</button>
     <table id="historiTabel">
@@ -154,11 +135,10 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxlctfptXA-0bv6LJ_HjVJ14DMWkQ6jOX5lDS6xrqk1sx_RVE1HcM5enqZM2IYWALK/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJGdPMLXy3UQHejnHVZyHgRzz4EInUrST0vLso36WyO5ni9qgayaJI3D3c59Nbt3Mg/exec"; 
     const DELETE_PASSWORD = "12345"; 
     let startTime, interval;
     let izinStarted = false;
-    let sudahDiperingatkan = false;
     let historiData = [];
 
     function formatMenitDetik(totalDetik) {
@@ -176,17 +156,12 @@
       }
       if (!izinStarted) {
         izinStarted = true;
-        sudahDiperingatkan = false;
         startTime = Date.now();
         document.getElementById("peringatanBox").style.display = "none";
         interval = setInterval(() => {
           const now = Date.now();
           const elapsed = Math.floor((now - startTime) / 1000);
           document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
-          if (elapsed >= 900 && !sudahDiperingatkan) {
-            sudahDiperingatkan = true;
-            alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
-          }
         }, 1000);
       }
     }
@@ -225,39 +200,35 @@
             status: statusText
           })
         });
-
-        ambilHistori();
       }
-    }
-
-    async function hapusHistori(index) {
-      const pass = prompt("Masukkan Password untuk hapus data:");
-      if (pass !== DELETE_PASSWORD) {
-        alert("❌ Password salah!");
-        return;
-      }
-      await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "delete", index: index, password: pass })
-      });
-      ambilHistori();
     }
 
     async function ambilHistori() {
       try {
         const response = await fetch(SCRIPT_URL);
         historiData = await response.json();
-        renderHistori();
       } catch (err) {
         console.error("Gagal ambil histori:", err);
       }
     }
 
-    function renderHistori(filterNama = "all") {
+    function cariHistori() {
+      const namaFilter = document.getElementById("filterNama").value.trim().toLowerCase();
+      const tanggalFilter = document.getElementById("filterTanggal").value;
+
+      if (!namaFilter || !tanggalFilter) {
+        alert("⚠️ Harap isi Nama dan Tanggal terlebih dahulu.");
+        return;
+      }
+
       const tbody = document.querySelector("#historiTabel tbody");
       tbody.innerHTML = "";
+
       historiData
-        .filter(item => filterNama === "all" || item.nama.toLowerCase().includes(filterNama.toLowerCase()))
+        .filter(item => 
+          item.nama.toLowerCase().includes(namaFilter) &&
+          item.mulai.startsWith(new Date(tanggalFilter).toLocaleDateString("id-ID"))
+        )
         .forEach((item, index) => {
           const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
           const tr = document.createElement("tr");
@@ -273,15 +244,21 @@
           `;
           tbody.appendChild(tr);
       });
+
+      document.getElementById("histori").style.display = "block";
     }
 
-    function cariHistori() {
-      const typedName = document.getElementById("searchNama").value.trim();
-      if (typedName) {
-        renderHistori(typedName);
-      } else {
-        renderHistori(document.getElementById("filterNama").value);
+    async function hapusHistori(index) {
+      const pass = prompt("Masukkan Password untuk hapus data:");
+      if (pass !== DELETE_PASSWORD) {
+        alert("❌ Password salah!");
+        return;
       }
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "delete", index: index, password: pass })
+      });
+      ambilHistori();
     }
 
     function exportToExcel() {
