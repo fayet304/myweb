@@ -13,13 +13,11 @@
       background-attachment: fixed;
       font-family: Arial, sans-serif;
     }
-
     h1, h2 {
       text-align: center;
       color: #fff;
       text-shadow: 1px 1px 4px #000;
     }
-
     form {
       background: rgba(255, 255, 255, 0.95);
       padding: 20px;
@@ -28,12 +26,10 @@
       margin: 0 auto;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-
     label {
       display: block;
       margin: 10px 0 5px;
     }
-
     select, button {
       width: 100%;
       padding: 10px;
@@ -41,27 +37,22 @@
       border-radius: 5px;
       border: 1px solid #ccc;
     }
-
     button {
       background-color: #2c3e50;
       color: white;
       cursor: pointer;
       transition: background 0.3s ease;
     }
-
     button:hover {
       background-color: #1a252f;
     }
-
     .timer, .duration {
       text-align: center;
       font-weight: bold;
       margin-top: 20px;
     }
-
     .timer span { color: #e74c3c; }
     .duration span { color: #27ae60; }
-
     .peringatan {
       margin-top: 20px;
       text-align: center;
@@ -70,31 +61,25 @@
       padding: 10px;
       border-radius: 5px;
     }
-
     .peringatan.lebih {
       background-color: #ffcccc;
       color: #c0392b;
     }
-
     .peringatan.normal {
       background-color: #ccffcc;
       color: #2ecc71;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
     }
-
     table, th, td {
       border: 1px solid #999;
     }
-
     th, td {
       padding: 8px;
       text-align: center;
     }
-
     #histori {
       max-width: 95%;
       margin: 30px auto;
@@ -152,8 +137,7 @@
   </div>
 
   <script>
-    // jika ingin simpan ke Google Sheet, ganti URL di sini
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWIZqQsibMHrP4bucIMut1nqybKRQv9ApEMli-0_8NeO8-UbjxKP6GRQlE-rpQetwB/exec"; 
+    const SCRIPT_URL = "GANTI_DENGAN_URL_WEB_APPS_MU"; // contoh: https://script.google.com/macros/s/AKfyc.../exec
 
     let startTime, interval;
     let izinStarted = false;
@@ -222,7 +206,7 @@
         const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
         const waktu_selesai = new Date().toLocaleString("id-ID");
 
-        // simpan ke array lokal
+        // Simpan lokal
         historiData.push({
           nama,
           izin,
@@ -231,28 +215,23 @@
           durasi: durasiText
         });
         localStorage.setItem("historiIzin", JSON.stringify(historiData));
-
-        const formData = new URLSearchParams();
-formData.append("nama", nama);
-formData.append("izin", izin);
-formData.append("mulai", waktu_mulai);
-formData.append("selesai", waktu_selesai);
-formData.append("durasi", durasiText);
-
-fetch(SCRIPT_URL, {
-  method: "POST",
-  body: formData
-})
-.then(res => res.text())
-.then(data => console.log("Sukses kirim ke Google Sheets:", data))
-.catch(err => console.error("Gagal kirim ke Google Sheets:", err));
-  })
-})
-.then(res => res.text())
-.then(data => console.log("Sukses kirim ke Google Sheets:", data))
-.catch(err => console.error("Gagal kirim ke Google Sheets:", err));
-        
         renderHistori();
+
+        // Kirim ke Google Sheet tanpa CORS error
+        const formData = new URLSearchParams();
+        formData.append("nama", nama);
+        formData.append("izin", izin);
+        formData.append("mulai", waktu_mulai);
+        formData.append("selesai", waktu_selesai);
+        formData.append("durasi", durasiText);
+
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          body: formData
+        })
+        .then(res => res.text())
+        .then(data => console.log("✅ Sukses kirim ke Google Sheets:", data))
+        .catch(err => console.error("❌ Gagal kirim ke Google Sheets:", err));
       }
     }
 
@@ -287,3 +266,18 @@ fetch(SCRIPT_URL, {
   </script>
 </body>
 </html>
+✅ Apps Script doPost(e) (copy-paste ke script Google Sheets):
+javascript
+Copy
+Edit
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  sheet.appendRow([
+    e.parameter.nama,
+    e.parameter.izin,
+    e.parameter.mulai,
+    e.parameter.selesai,
+    e.parameter.durasi
+  ]);
+  return ContentService.createTextOutput("Sukses").setMimeType(ContentService.MimeType.TEXT);
+}
