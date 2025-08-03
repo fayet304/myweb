@@ -117,8 +117,8 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0wq8D2gsU5157S8c7XxvRmmBgO4Kz7ma-IL_HH29YHEUkHBoPyk1ybqeRwG0JhSoc/exec"; 
-    const DELETE_PASSWORD = "12345"; // ubah sesuai kebutuhan
+    const SCRIPT_URL = "PASTE_URL_WEB_APP"; // ganti dengan URL Web App Google Apps Script
+    const DELETE_PASSWORD = "12345"; // ganti password sesuai kebutuhan
     let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
@@ -163,11 +163,15 @@
         const durasiText = formatMenitDetik(durasi);
         document.getElementById("durasiIzin").innerText = durasiText;
         document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
+
+        const statusText = durasi > 900 ? "⚠️ Melebihi batas waktu" : "✅ Selamat datang kembali";
+        const statusClass = durasi > 900 ? "lebih" : "normal";
+
         const peringatanBox = document.getElementById("peringatanBox");
         peringatanBox.style.display = "block";
-        let statusText = durasi > 900 ? "⚠️ Lebih Waktu Izin" : "✅ Selamat";
         peringatanBox.textContent = statusText;
-        peringatanBox.className = "peringatan " + (durasi > 900 ? "lebih" : "normal");
+        peringatanBox.className = "peringatan " + statusClass;
+
         const nama = document.getElementById("nama").value;
         const izin = document.getElementById("izin").value;
         const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
@@ -195,7 +199,6 @@
         alert("❌ Password salah!");
         return;
       }
-      const data = historiData[index];
       await fetch(SCRIPT_URL, {
         method: "POST",
         body: JSON.stringify({ action: "delete", index: index, password: pass })
@@ -220,6 +223,7 @@
       historiData
         .filter(item => filterNama === "all" || item.nama === filterNama)
         .forEach((item, index) => {
+          const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${index + 1}</td>
@@ -228,7 +232,7 @@
             <td>${item.mulai}</td>
             <td>${item.selesai}</td>
             <td>${item.durasi}</td>
-            <td class="${item.status.includes("Lebih") ? "status-lebih" : "status-normal"}">${item.status}</td>
+            <td class="${statusClass}">${item.status}</td>
             <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
           `;
           tbody.appendChild(tr);
