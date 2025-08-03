@@ -49,7 +49,7 @@
     table, th, td { border: 1px solid #999; }
     th, td { padding: 8px; text-align: center; }
     #histori { max-width: 95%; margin: 30px auto; background: white;
-      padding: 20px; border-radius: 10px; display:none; }
+      padding: 20px; border-radius: 10px; }
     .status-normal { color: green; font-weight: bold; }
     .status-lebih { color: red; font-weight: bold; }
     .btn-delete {
@@ -66,27 +66,30 @@
     <label for="nama">Nama Karyawan:</label>
     <select id="nama">
       <option value="">Pilih Nama</option>
-      <option value="Muhammad Alfayet">Muhammad Alfayet</option>
-      <option value="Muhammad Ridwan Hidayat">Muhammad Ridwan Hidayat</option>
-      <option value="Cusyati">Cusyati</option>
-      <option value="RIZKY HENDRA">RIZKY HENDRA</option>
-      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-      <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
-      <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
-      <option value="HERMAN SUGITO">HERMAN SUGITO</option>
-      <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
-      <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
-      <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
-      <option value="DEDEN SURYANA">DEDEN SURYANA</option>
-      <option value="ARISON">ARISON</option>
-      <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
-      <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
-      <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
-      <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
-      <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
-      <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
-      <option value="MALEK RAHMAD">MALEK RAHMAD</option>
-      <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
+      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>					
+<option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>					
+<option value="CUSYATI">CUSYATI</option>					
+<option value="RIZKY HENDRA">RIZKY HENDRA</option>					
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
+<option value="Cusyati">Cusyati</option>					
+<option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>					
+<option value="INDAH WULAN JULI">INDAH WULAN JULI</option>					
+<option value="HERMAN SUGITO">HERMAN SUGITO</option>					
+<option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>					
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
+<option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>					
+<option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>					
+<option value="DEDEN SURYANA">DEDEN SURYANA</option>					
+<option value="ARISON">ARISON</option>					
+<option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>					
+<option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>					
+<option value="SARAH SITOMPUL">SARAH SITOMPUL</option>					
+<option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>					
+<option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>					
+<option value="GALANG TRI RISKI">GALANG TRI RISKI</option>					
+<option value="MALEK RAHMAD">MALEK RAHMAD</option>					
+<option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>					
+</select>					
     </select>
 
     <label for="izin">Jenis Izin:</label>
@@ -108,11 +111,40 @@
 
   <div id="histori">
     <h2>Histori Izin</h2>
-    <label for="filterNama">Nama Karyawan:</label>
-    <input type="text" id="filterNama" placeholder="Ketik Nama Karyawan">
-    <label for="filterTanggal">Tanggal (YYYY-MM-DD):</label>
-    <input type="date" id="filterTanggal">
+
+    <label for="filterNama">Filter Berdasarkan Nama (Dropdown):</label>
+    <select id="filterNama">
+      <option value="all">Semua</option>
+      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>					
+<option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>					
+<option value="CUSYATI">CUSYATI</option>					
+<option value="RIZKY HENDRA">RIZKY HENDRA</option>					
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
+<option value="Cusyati">Cusyati</option>					
+<option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>					
+<option value="INDAH WULAN JULI">INDAH WULAN JULI</option>					
+<option value="HERMAN SUGITO">HERMAN SUGITO</option>					
+<option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>					
+<option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>					
+<option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>					
+<option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>					
+<option value="DEDEN SURYANA">DEDEN SURYANA</option>					
+<option value="ARISON">ARISON</option>					
+<option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>					
+<option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>					
+<option value="SARAH SITOMPUL">SARAH SITOMPUL</option>					
+<option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>					
+<option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>					
+<option value="GALANG TRI RISKI">GALANG TRI RISKI</option>					
+<option value="MALEK RAHMAD">MALEK RAHMAD</option>					
+<option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
+    </select>
+
+    <br><br>
+    <label for="searchNama">Atau ketik nama sendiri:</label>
+    <input type="text" id="searchNama" placeholder="Ketik Nama Karyawan">
     <button type="button" onclick="cariHistori()">Tampilkan Riwayat</button>
+
     <br><br>
     <button onclick="exportToExcel()">Export ke Excel</button>
     <table id="historiTabel">
@@ -133,10 +165,11 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykux2n00FgaKY6zrRMBRVik5kt8-nxpDsZ7R33_uYsusFFMrEerSjYNfUf58hIJEXYRg/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUzaxhJfJOnzAUl9qQSTO6dbdNl4OrFORN4HQJNnbGJsU65Tmo9_ymQBr67lRAsTkNg/exec"; 
     const DELETE_PASSWORD = "12345"; 
     let startTime, interval;
     let izinStarted = false;
+    let sudahDiperingatkan = false;
     let historiData = [];
 
     function formatMenitDetik(totalDetik) {
@@ -154,12 +187,17 @@
       }
       if (!izinStarted) {
         izinStarted = true;
+        sudahDiperingatkan = false;
         startTime = Date.now();
         document.getElementById("peringatanBox").style.display = "none";
         interval = setInterval(() => {
           const now = Date.now();
           const elapsed = Math.floor((now - startTime) / 1000);
           document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
+          if (elapsed >= 900 && !sudahDiperingatkan) {
+            sudahDiperingatkan = true;
+            alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
+          }
         }, 1000);
       }
     }
@@ -198,44 +236,40 @@
             status: statusText
           })
         });
-        await ambilHistori(); // refresh otomatis
+
+        ambilHistori();
       }
+    }
+
+    async function hapusHistori(index) {
+      const pass = prompt("Masukkan Password untuk hapus data:");
+      if (pass !== DELETE_PASSWORD) {
+        alert("❌ Password salah!");
+        return;
+      }
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "delete", index: index, password: pass })
+      });
+      ambilHistori();
     }
 
     async function ambilHistori() {
       try {
         const response = await fetch(SCRIPT_URL);
         historiData = await response.json();
-        console.log("Histori Data:", historiData);
+        renderHistori();
       } catch (err) {
         console.error("Gagal ambil histori:", err);
       }
     }
 
-    function cariHistori() {
-      const namaFilter = document.getElementById("filterNama").value.trim().toLowerCase();
-      const tanggalFilter = document.getElementById("filterTanggal").value;
-
-      if (!namaFilter || !tanggalFilter) {
-        alert("⚠️ Harap isi Nama dan Tanggal terlebih dahulu.");
-        return;
-      }
-
+    function renderHistori(filterNama = "all") {
       const tbody = document.querySelector("#historiTabel tbody");
       tbody.innerHTML = "";
-
-      const tanggalFilterStr = new Date(tanggalFilter).toLocaleDateString("id-ID");
-
-      const hasil = historiData.filter(item => {
-        const tanggalItem = new Date(item.mulai).toLocaleDateString("id-ID");
-        return item.nama.toLowerCase().includes(namaFilter) &&
-               tanggalItem === tanggalFilterStr;
-      });
-
-      if (hasil.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8">❌ Tidak ada data ditemukan</td></tr>`;
-      } else {
-        hasil.forEach((item, index) => {
+      historiData
+        .filter(item => filterNama === "all" || item.nama.toLowerCase().includes(filterNama.toLowerCase()))
+        .forEach((item, index) => {
           const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -249,24 +283,16 @@
             <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
           `;
           tbody.appendChild(tr);
-        });
-      }
-
-      document.getElementById("histori").style.display = "block";
+      });
     }
 
-    async function hapusHistori(index) {
-      const pass = prompt("Masukkan Password untuk hapus data:");
-      if (pass !== DELETE_PASSWORD) {
-        alert("❌ Password salah!");
-        return;
+    function cariHistori() {
+      const typedName = document.getElementById("searchNama").value.trim();
+      if (typedName) {
+        renderHistori(typedName);
+      } else {
+        renderHistori(document.getElementById("filterNama").value);
       }
-      await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "delete", index: index, password: pass })
-      });
-      await ambilHistori();
-      alert("✅ Data berhasil dihapus!");
     }
 
     function exportToExcel() {
