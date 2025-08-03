@@ -264,6 +264,12 @@
     function renderHistori() {
       const tbody = document.querySelector("#historiTabel tbody");
       tbody.innerHTML = "";
+
+      if (historiData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7">Belum ada data izin</td></tr>`;
+        return;
+      }
+
       historiData.forEach((item, index) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
