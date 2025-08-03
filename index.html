@@ -26,86 +26,37 @@
       margin: 0 auto;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-    label {
-      display: block;
-      margin: 10px 0 5px;
-    }
+    label { display: block; margin: 10px 0 5px; }
     select, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      width: 100%; padding: 10px; margin-bottom: 15px;
+      border-radius: 5px; border: 1px solid #ccc;
     }
     button {
-      background-color: #2c3e50;
-      color: white;
-      cursor: pointer;
+      background-color: #2c3e50; color: white; cursor: pointer;
       transition: background 0.3s ease;
     }
-    button:hover {
-      background-color: #1a252f;
-    }
-    .timer, .duration {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 20px;
-    }
+    button:hover { background-color: #1a252f; }
+    .timer, .duration { text-align: center; font-weight: bold; margin-top: 20px; }
     .timer span { color: #e74c3c; }
     .duration span { color: #27ae60; }
     .peringatan {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 1.2em;
-      font-weight: bold;
-      padding: 10px;
-      border-radius: 5px;
+      margin-top: 20px; text-align: center; font-size: 1.2em;
+      font-weight: bold; padding: 10px; border-radius: 5px;
     }
-    .peringatan.lebih {
-      background-color: #ffcccc;
-      color: #c0392b;
-    }
-    .peringatan.normal {
-      background-color: #ccffcc;
-      color: #2ecc71;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    table, th, td {
-      border: 1px solid #999;
-    }
-    th, td {
-      padding: 8px;
-      text-align: center;
-    }
-    #histori {
-      max-width: 95%;
-      margin: 30px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    .status-normal {
-      color: green;
-      font-weight: bold;
-    }
-    .status-lebih {
-      color: red;
-      font-weight: bold;
-    }
+    .peringatan.lebih { background-color: #ffcccc; color: #c0392b; }
+    .peringatan.normal { background-color: #ccffcc; color: #2ecc71; }
+    table { width: 100%; border-collapse: collapse; }
+    table, th, td { border: 1px solid #999; }
+    th, td { padding: 8px; text-align: center; }
+    #histori { max-width: 95%; margin: 30px auto; background: white;
+      padding: 20px; border-radius: 10px; }
+    .status-normal { color: green; font-weight: bold; }
+    .status-lebih { color: red; font-weight: bold; }
     .btn-delete {
-      background-color: #c0392b;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      background-color: #c0392b; color: white; padding: 5px 10px;
+      border: none; border-radius: 5px; cursor: pointer;
     }
-    .btn-delete:hover {
-      background-color: #922b21;
-    }
+    .btn-delete:hover { background-color: #922b21; }
   </style>
 </head>
 <body>
@@ -158,6 +109,7 @@
           <th>Selesai</th>
           <th>Durasi</th>
           <th>Status</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -165,7 +117,8 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxll7nD3WN6C6odtwyu9UPcJA_DZvWyAMheiEm32_qd_q4XQWRU0kMruHE4TnyhTT_g/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0wq8D2gsU5157S8c7XxvRmmBgO4Kz7ma-IL_HH29YHEUkHBoPyk1ybqeRwG0JhSoc/exec"; 
+    const DELETE_PASSWORD = "12345"; // ubah sesuai kebutuhan
     let startTime, interval;
     let izinStarted = false;
     let sudahDiperingatkan = false;
@@ -223,6 +176,7 @@
         await fetch(SCRIPT_URL, {
           method: "POST",
           body: JSON.stringify({
+            action: "add",
             nama, izin,
             mulai: waktu_mulai,
             selesai: waktu_selesai,
@@ -233,6 +187,20 @@
 
         ambilHistori();
       }
+    }
+
+    async function hapusHistori(index) {
+      const pass = prompt("Masukkan Password untuk hapus data:");
+      if (pass !== DELETE_PASSWORD) {
+        alert("❌ Password salah!");
+        return;
+      }
+      const data = historiData[index];
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "delete", index: index, password: pass })
+      });
+      ambilHistori();
     }
 
     async function ambilHistori() {
@@ -261,6 +229,7 @@
             <td>${item.selesai}</td>
             <td>${item.durasi}</td>
             <td class="${item.status.includes("Lebih") ? "status-lebih" : "status-normal"}">${item.status}</td>
+            <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
           `;
           tbody.appendChild(tr);
       });
