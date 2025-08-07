@@ -1,458 +1,772 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Form Izin Keluar</title>
-  <style>
-    body {
-      background: url('bck.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      font-family: Arial, sans-serif;
-      color: #333;
-    }
-    h1, h2 {
-      text-align: center;
-      color: #fff;
-      text-shadow: 1px 1px 4px #000;
-    }
-    form {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 420px;
-      margin: 20px auto 30px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: background-color 0.5s ease;
-    }
-    form.aktif { background-color: #e0ffe0; } /* hijau lembut */
-    form.aktif-lebih { background-color: #ffe0e0; } /* merah lembut */
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Form Izin Keluar</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-color: #f0f4f8;
+            --accent-color: #ffc107;
+            --bg-dark: #263238;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --border-color: #e0e0e0;
+        }
 
-    label { display: block; margin: 10px 0 5px; }
-    select, input, button {
-      width: 100%; padding: 10px; margin-bottom: 15px;
-      border-radius: 5px; border: 1px solid #ccc;
-      font-size: 1em;
-    }
-    button {
-      background-color: #2c3e50; color: white; cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover { background-color: #1a252f; }
-    .timer, .duration {
-      text-align: center; font-weight: bold; margin-top: 10px; font-size: 1.1em;
-    }
-    .timer span { color: #e74c3c; }
-    .duration span { color: #27ae60; }
-    .peringatan {
-      margin-top: 20px; text-align: center; font-size: 1.2em;
-      font-weight: bold; padding: 10px; border-radius: 5px;
-    }
-    .peringatan.lebih { background-color: #ffcccc; color: #c0392b; }
-    .peringatan.normal { background-color: #ccffcc; color: #2ecc71; }
-    .status-aktif { 
-      display: none; 
-      text-align: center; 
-      font-weight: bold; 
-      margin: 10px 0; 
-      padding: 8px; 
-      border-radius: 5px; 
-    }
-    .status-aktif.hijau { background: #d4edda; color: #155724; }
-    .status-aktif.merah { background: #f8d7da; color: #721c24; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), #1a237e);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background-attachment: fixed;
+        }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 15px;}
-    table, th, td { border: 1px solid #999; }
-    th, td { padding: 8px; text-align: center; font-size: 0.9em;}
-    #histori, #aktifList {
-      max-width: 95%; margin: 20px auto; background: white;
-      padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    .status-normal { color: green; font-weight: bold; }
-    .status-lebih { color: red; font-weight: bold; }
-    .btn-delete {
-      background-color: #c0392b; color: white; padding: 5px 10px;
-      border: none; border-radius: 5px; cursor: pointer;
-    }
-    .btn-delete:hover { background-color: #922b21; }
-  </style>
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin-top: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--text-light);
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+            font-weight: 600;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(5px);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .form-izin {
+            display: grid;
+            gap: 15px;
+        }
+
+        .form-izin.aktif { border-left: 5px solid var(--success-color); }
+        .form-izin.aktif-lebih { border-left: 5px solid var(--danger-color); }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--secondary-color);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-light);
+        }
+
+        button.btn-primary { background-color: var(--primary-color); }
+        button.btn-primary:hover { background-color: #303f9f; transform: translateY(-2px); }
+
+        button.btn-secondary { background-color: var(--warning-color); }
+        button.btn-secondary:hover { background-color: #ffa000; transform: translateY(-2px); }
+        
+        .info-box {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .info-box.hijau { background-color: #e8f5e9; color: var(--success-color); }
+        .info-box.merah { background-color: #ffebee; color: var(--danger-color); }
+        .info-box i { font-size: 1.2em; }
+
+        .peringatan-box {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1em;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .peringatan-box.normal { background-color: var(--success-color); color: var(--text-light); }
+        .peringatan-box.lebih { background-color: var(--danger-color); color: var(--text-light); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .timer-info {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .timer-info .item {
+            background: var(--secondary-color);
+            padding: 15px;
+            border-radius: 10px;
+            width: 48%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .timer-info .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .timer-info .value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .timer-info .value.lebih { color: var(--danger-color); }
+
+        .section-title {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            color: var(--text-light);
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--text-light);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .status-normal { color: var(--success-color); font-weight: 600; }
+        .status-lebih { color: var(--danger-color); font-weight: 600; }
+        
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: var(--text-light);
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9em;
+        }
+        .btn-delete:hover { background-color: #c62828; }
+
+        .filter-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-controls label {
+            margin: 0;
+            white-space: nowrap;
+            color: var(--primary-color);
+        }
+        
+        .export-button {
+            background-color: #2e7d32;
+            color: var(--text-light);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .export-button:hover { background-color: #1b5e20; transform: translateY(-2px); }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #757575;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>Form Izin Keluar</h1>
-  <form id="izinForm">
-    <label for="nama">Nama Karyawan:</label>
-    <select id="nama">
-      <option value="">Pilih Nama</option>
-      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>
-      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
-      <option value="CUSYATI">CUSYATI</option>
-      <option value="RIZKY HENDRA">RIZKY HENDRA</option>
-      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-      <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
-      <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
-      <option value="HERMAN SUGITO">HERMAN SUGITO</option>
-      <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
-      <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
-      <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
-      <option value="DEDEN SURYANA">DEDEN SURYANA</option>
-      <option value="ARISON">ARISON</option>
-      <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
-      <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
-      <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
-      <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
-      <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
-      <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
-      <option value="MALEK RAHMAD">MALEK RAHMAD</option>
-      <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
-    </select>
+    <h1>Formulir Izin Keluar</h1>
 
-    <label for="izin">Jenis Izin:</label>
-    <select id="izin">
-      <option value="">Pilih Jenis Izin</option>
-      <option value="Toilet">Toilet</option>
-      <option value="Membeli Makan">Membeli Makan</option>
-      <option value="Merokok">Merokok</option>
-    </select>
+    <div class="container">
+        <div class="card form-izin" id="izinForm">
+            <div class="header">
+                <h2>Izin Keluar</h2>
+            </div>
+            <label for="nama">Nama Karyawan:</label>
+            <select id="nama">
+                <option value="">Pilih Nama</option>
+                <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>
+                <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
+                <option value="CUSYATI">CUSYATI</option>
+                <option value="RIZKY HENDRA">RIZKY HENDRA</option>
+                <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
+                <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
+                <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
+                <option value="HERMAN SUGITO">HERMAN SUGITO</option>
+                <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
+                <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
+                <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
+                <option value="DEDEN SURYANA">DEDEN SURYANA</option>
+                <option value="ARISON">ARISON</option>
+                <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
+                <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
+                <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
+                <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
+                <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
+                <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
+                <option value="MALEK RAHMAD">MALEK RAHMAD</option>
+                <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
+            </select>
 
-    <button type="button" onclick="mulaiIzin()">Mulai</button>
-    <button type="button" onclick="selesaiIzin()">Selesai</button>
+            <label for="izin">Jenis Izin:</label>
+            <select id="izin">
+                <option value="">Pilih Jenis Izin</option>
+                <option value="Toilet">Toilet</option>
+                <option value="Membeli Makan">Membeli Makan</option>
+                <option value="Merokok">Merokok</option>
+            </select>
 
-    <div id="statusAktif" class="status-aktif"></div>
+            <div class="button-group">
+                <button type="button" class="btn-primary" onclick="mulaiIzin()"><i class="fas fa-play"></i> Mulai</button>
+                <button type="button" class="btn-secondary" onclick="selesaiIzin()"><i class="fas fa-stop"></i> Selesai</button>
+            </div>
 
-    <div class="timer">Waktu Berjalan: <span id="waktuBerjalan">0 menit 0 detik</span></div>
-    <div class="duration">Durasi Izin: <span id="durasiIzin">0 menit 0 detik</span></div>
+            <div id="statusAktif" class="info-box" style="display: none;"></div>
 
-    <div id="peringatanBox" class="peringatan" style="display:none;"></div>
-  </form>
+            <div class="timer-info">
+                <div class="item">
+                    <div class="label">Waktu Berjalan</div>
+                    <div class="value" id="waktuBerjalan">0 menit 0 detik</div>
+                </div>
+                <div class="item">
+                    <div class="label">Durasi Izin</div>
+                    <div class="value" id="durasiIzin">0 menit 0 detik</div>
+                </div>
+            </div>
 
-  <div id="aktifList">
-    <h2>Izin Sedang Berjalan</h2>
-    <table id="izinAktifTable">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Nama</th>
-          <th>Jenis Izin</th>
-          <th>Mulai</th>
-          <th>Durasi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Data izin aktif akan dimuat di sini -->
-      </tbody>
-    </table>
-  </div>
+            <div id="peringatanBox" class="peringatan-box" style="display: none;"></div>
+        </div>
 
-  <div id="histori">
-    <h2>Histori Izin</h2>
+        <h2 class="section-title">Izin Sedang Berjalan</h2>
+        <div class="card" id="aktifList">
+            <table id="izinAktifTable">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Jenis Izin</th>
+                        <th>Mulai</th>
+                        <th>Durasi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data izin aktif akan dimuat di sini -->
+                </tbody>
+            </table>
+            <div id="noAktifIzin" class="empty-message">Tidak ada izin yang sedang berjalan.</div>
+        </div>
 
-    <label for="filterNama">Filter Berdasarkan Nama:</label>
-    <select id="filterNama">
-      <option value="all">Semua</option>
-      <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>
-      <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
-      <option value="CUSYATI">CUSYATI</option>
-      <option value="RIZKY HENDRA">RIZKY HENDRA</option>
-      <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
-      <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
-      <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
-      <option value="HERMAN SUGITO">HERMAN SUGITO</option>
-      <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
-      <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
-      <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
-      <option value="DEDEN SURYANA">DEDEN SURYANA</option>
-      <option value="ARISON">ARISON</option>
-      <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
-      <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
-      <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
-      <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
-      <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
-      <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
-      <option value="MALEK RAHMAD">MALEK RAHMAD</option>
-      <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
-    </select>
+        <h2 class="section-title">Histori Izin</h2>
+        <div class="card" id="histori">
+            <div class="filter-controls">
+                <label for="filterNama"><i class="fas fa-filter"></i> Filter:</label>
+                <select id="filterNama" onchange="cariHistori()">
+                    <option value="all">Semua</option>
+                    <option value="MUHAMMAD ALFAYET">MUHAMMAD ALFAYET</option>
+                    <option value="MUHAMMAD RIDWAN HIDAYAT">MUHAMMAD RIDWAN HIDAYAT</option>
+                    <option value="CUSYATI">CUSYATI</option>
+                    <option value="RIZKY HENDRA">RIZKY HENDRA</option>
+                    <option value="PUTRI AJI MEINASARI">PUTRI AJI MEINASARI</option>
+                    <option value="YUSRIL ARDIANSYAH">YUSRIL ARDIANSYAH</option>
+                    <option value="INDAH WULAN JULI">INDAH WULAN JULI</option>
+                    <option value="HERMAN SUGITO">HERMAN SUGITO</option>
+                    <option value="JEFRI SUPRIANTO">JEFRI SUPRIANTO</option>
+                    <option value="DIFI ZIANKA LISTIAWAN">DIFI ZIANKA LISTIAWAN</option>
+                    <option value="MUHAMMAD NURHADI">MUHAMMAD NURHADI</option>
+                    <option value="DEDEN SURYANA">DEDEN SURYANA</option>
+                    <option value="ARISON">ARISON</option>
+                    <option value="ANGEL KUSNITA PERMATA DEWI">ANGEL KUSNITA PERMATA DEWI</option>
+                    <option value="AGUNG RAFIANSYAH">AGUNG RAFIANSYAH</option>
+                    <option value="SARAH SITOMPUL">SARAH SITOMPUL</option>
+                    <option value="AUREL ADHITYA ANDIK">AUREL ADHITYA ANDIK</option>
+                    <option value="SAIPUL BAHRI SIREGAR">SAIPUL BAHRI SIREGAR</option>
+                    <option value="GALANG TRI RISKI">GALANG TRI RISKI</option>
+                    <option value="MALEK RAHMAD">MALEK RAHMAD</option>
+                    <option value="ARIK DINATA KUSUMA">ARIK DINATA KUSUMA</option>
+                </select>
+                <button type="button" class="btn-primary" onclick="cariHistori()"><i class="fas fa-search"></i> Cari</button>
+            </div>
+            <br>
+            <button onclick="exportToExcel()" class="export-button"><i class="fas fa-file-excel"></i> Export ke Excel</button>
+            <table id="historiTabel">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Jenis Izin</th>
+                        <th>Mulai</th>
+                        <th>Selesai</th>
+                        <th>Durasi</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="noHistoriIzin" class="empty-message">Tidak ada histori izin.</div>
+        </div>
+    </div>
+    
+    <audio id="notifAudio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
-    <button type="button" onclick="cariHistori()">Tampilkan Riwayat</button>
+    <!-- Modal untuk alert pengganti -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modal-message"></p>
+        </div>
+    </div>
 
-    <br><br>
-    <button onclick="exportToExcel()">Export ke Excel</button>
+    <script>
+        // Ganti URL ini dengan URL Apps Script yang sudah Anda deploy
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzW8Pdmn7p2Yvw9cf7Or2ZlXP2EE6BT4XmZBqW9d_GdIr3a9xk9zBtqrkm0JSoP_Yr4Pw/exec";
+        const DELETE_PASSWORD = "12345";
 
-    <table id="historiTabel">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Nama</th>
-          <th>Jenis Izin</th>
-          <th>Mulai</th>
-          <th>Selesai</th>
-          <th>Durasi</th>
-          <th>Status</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+        let startTime, interval;
+        let izinStarted = false;
+        let sudahDiperingatkan = false;
+        let historiData = [];
+        let izinAktifData = [];
+        let activeTimer = null;
 
-  <!-- Audio Peringatan -->
-  <audio id="notifAudio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+        // Fungsi pengganti alert
+        function customAlert(message) {
+            const modal = document.getElementById("myModal");
+            const modalMessage = document.getElementById("modal-message");
+            const span = document.getElementsByClassName("close-button")[0];
 
-<script>
-  // Ganti ini dengan URL Apps Script yang Anda gunakan
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzW8Pdmn7p2Yvw9cf7Or2ZlXP2EE6BT4XmZBqW9d_GdIr3a9xk9zBtqrkm0JSoP_Yr4Pw/exec";
-  const DELETE_PASSWORD = "12345";
+            modalMessage.innerText = message;
+            modal.style.display = "block";
 
-  let startTime, interval;
-  let izinStarted = false;
-  let sudahDiperingatkan = false;
-  let historiData = [];
-  let izinAktifData = [];
+            span.onclick = function() {
+                modal.style.display = "none";
+            };
 
-  function formatMenitDetik(totalDetik) {
-    const menit = Math.floor(totalDetik / 60);
-    const detik = totalDetik % 60;
-    return `${menit} menit ${detik} detik`;
-  }
-
-  function mulaiTimer() {
-    clearInterval(interval);
-    interval = setInterval(() => {
-      const now = Date.now();
-      const elapsed = Math.floor((now - startTime) / 1000);
-      document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
-
-      const form = document.getElementById("izinForm");
-      const statusBox = document.getElementById("statusAktif");
-
-      if (elapsed >= 900) {
-        form.classList.remove("aktif");
-        form.classList.add("aktif-lebih");
-        statusBox.className = "status-aktif merah";
-        statusBox.style.display = "block";
-        statusBox.innerText = "⚠️ Izin melewati 15 menit!";
-        if (!sudahDiperingatkan) {
-          sudahDiperingatkan = true;
-          document.getElementById("notifAudio").play();
-          alert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
         }
-      } else {
-        form.classList.add("aktif");
-        form.classList.remove("aktif-lebih");
-        statusBox.className = "status-aktif hijau";
-        statusBox.style.display = "block";
-        statusBox.innerText = "🔔 Izin sedang berlangsung...";
-      }
-    }, 1000);
-  }
 
-  function mulaiIzin() {
-    const nama = document.getElementById("nama").value;
-    const izin = document.getElementById("izin").value;
-    if (!nama || !izin) {
-      alert("⚠️ Silakan pilih nama dan jenis izin terlebih dahulu.");
-      return;
-    }
-    if (!izinStarted) {
-      izinStarted = true;
-      sudahDiperingatkan = false;
-      startTime = Date.now();
-      localStorage.setItem("izinStartTime", startTime);
-      localStorage.setItem("izinStarted", "true");
-      localStorage.setItem("namaDipilih", nama);
-      localStorage.setItem("izinDipilih", izin);
+        function formatMenitDetik(totalDetik) {
+            const menit = Math.floor(totalDetik / 60);
+            const detik = totalDetik % 60;
+            return `${menit} menit ${detik} detik`;
+        }
 
-      document.getElementById("peringatanBox").style.display = "none";
-      mulaiTimer();
+        function mulaiTimer() {
+            clearInterval(activeTimer);
+            activeTimer = setInterval(() => {
+                const now = Date.now();
+                const elapsed = Math.floor((now - startTime) / 1000);
+                const waktuBerjalan = document.getElementById("waktuBerjalan");
+                const form = document.getElementById("izinForm");
+                const statusBox = document.getElementById("statusAktif");
 
-      // Kirim status izin aktif ke server (add/update izin aktif)
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "start",
-          nama: nama,
-          izin: izin,
-          mulai: new Date(startTime).toISOString()
-        }),
-      }).then(() => ambilIzinAktif());
-    }
-  }
+                waktuBerjalan.innerText = formatMenitDetik(elapsed);
 
-  async function selesaiIzin() {
-    if (izinStarted) {
-      izinStarted = false;
-      clearInterval(interval);
-      localStorage.removeItem("izinStartTime");
-      localStorage.removeItem("izinStarted");
-      localStorage.removeItem("namaDipilih");
-      localStorage.removeItem("izinDipilih");
+                if (elapsed >= 900) {
+                    form.classList.remove("aktif");
+                    form.classList.add("aktif-lebih");
+                    statusBox.className = "info-box merah";
+                    statusBox.style.display = "flex";
+                    statusBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Izin melewati 15 menit!';
+                    waktuBerjalan.classList.add('lebih');
+                    if (!sudahDiperingatkan) {
+                        sudahDiperingatkan = true;
+                        document.getElementById("notifAudio").play();
+                        customAlert("⚠️ Anda telah melebihi batas waktu izin 15 menit!");
+                    }
+                } else {
+                    form.classList.add("aktif");
+                    form.classList.remove("aktif-lebih");
+                    statusBox.className = "info-box hijau";
+                    statusBox.style.display = "flex";
+                    statusBox.innerHTML = '<i class="fas fa-bell"></i> Izin sedang berlangsung...';
+                    waktuBerjalan.classList.remove('lebih');
+                }
+            }, 1000);
+        }
 
-      const form = document.getElementById("izinForm");
-      form.classList.remove("aktif", "aktif-lebih");
-      document.getElementById("statusAktif").style.display = "none";
+        function mulaiIzin() {
+            const nama = document.getElementById("nama").value;
+            const izin = document.getElementById("izin").value;
+            if (!nama || !izin) {
+                customAlert("⚠️ Silakan pilih nama dan jenis izin terlebih dahulu.");
+                return;
+            }
+            if (!izinStarted) {
+                izinStarted = true;
+                sudahDiperingatkan = false;
+                startTime = Date.now();
+                localStorage.setItem("izinStartTime", startTime);
+                localStorage.setItem("izinStarted", "true");
+                localStorage.setItem("namaDipilih", nama);
+                localStorage.setItem("izinDipilih", izin);
 
-      const endTime = Date.now();
-      const durasi = Math.floor((endTime - startTime) / 1000);
-      const durasiText = formatMenitDetik(durasi);
-      document.getElementById("durasiIzin").innerText = durasiText;
-      document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
+                document.getElementById("peringatanBox").style.display = "none";
+                mulaiTimer();
 
-      const statusText = durasi > 900 ? "⚠️ Melebihi batas waktu" : "✅ Selamat datang kembali";
-      const statusClass = durasi > 900 ? "lebih" : "normal";
+                fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "start",
+                        nama: nama,
+                        izin: izin,
+                        mulai: new Date(startTime).toISOString()
+                    }),
+                }).then(response => {
+                    if (!response.ok) {
+                        console.error("Kesalahan saat memulai izin:", response.status, response.statusText);
+                        throw new Error('Gagal memulai izin');
+                    }
+                    return response.text();
+                }).then(() => ambilIzinAktif()).catch(error => {
+                    console.error("Fetch error:", error);
+                    customAlert("⚠️ Gagal memulai izin. Periksa URL Apps Script Anda.");
+                });
+            }
+        }
 
-      const peringatanBox = document.getElementById("peringatanBox");
-      peringatanBox.style.display = "block";
-      peringatanBox.textContent = statusText;
-      peringatanBox.className = "peringatan " + statusClass;
+        async function selesaiIzin() {
+            if (izinStarted) {
+                izinStarted = false;
+                clearInterval(activeTimer);
+                localStorage.removeItem("izinStartTime");
+                localStorage.removeItem("izinStarted");
+                localStorage.removeItem("namaDipilih");
+                localStorage.removeItem("izinDipilih");
 
-      const nama = document.getElementById("nama").value;
-      const izin = document.getElementById("izin").value;
-      const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
-      const waktu_selesai = new Date().toLocaleString("id-ID");
+                const form = document.getElementById("izinForm");
+                form.classList.remove("aktif", "aktif-lebih");
+                document.getElementById("statusAktif").style.display = "none";
 
-      // Kirim data izin selesai ke server: simpan histori dan hapus izin aktif
-      await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "finish",
-          nama,
-          izin,
-          mulai: waktu_mulai,
-          selesai: waktu_selesai,
-          durasi: durasiText,
-          status: statusText
-        })
-      });
+                const endTime = Date.now();
+                const durasi = Math.floor((endTime - startTime) / 1000);
+                const durasiText = formatMenitDetik(durasi);
+                document.getElementById("durasiIzin").innerText = durasiText;
+                document.getElementById("waktuBerjalan").innerText = `0 menit 0 detik`;
+                document.getElementById("waktuBerjalan").classList.remove('lebih');
 
-      ambilHistori();
-      ambilIzinAktif();
-    }
-  }
+                const statusText = durasi > 900 ? "⚠️ Melebihi batas waktu" : "✅ Selamat datang kembali";
+                const statusClass = durasi > 900 ? "lebih" : "normal";
 
-  async function hapusHistori(index) {
-    const pass = prompt("Masukkan Password untuk hapus data:");
-    if (pass !== DELETE_PASSWORD) {
-      alert("❌ Password salah!");
-      return;
-    }
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "delete", index: index, password: pass })
-    });
-    ambilHistori();
-  }
+                const peringatanBox = document.getElementById("peringatanBox");
+                peringatanBox.style.display = "block";
+                peringatanBox.textContent = statusText;
+                peringatanBox.className = "peringatan-box " + statusClass;
 
-  async function ambilHistori() {
-    try {
-      const response = await fetch(SCRIPT_URL + "?action=histori");
-      historiData = await response.json();
-      renderHistori();
-    } catch (err) {
-      console.error("Gagal ambil histori:", err);
-    }
-  }
+                const nama = document.getElementById("nama").value;
+                const izin = document.getElementById("izin").value;
+                const waktu_mulai = new Date(startTime).toLocaleString("id-ID");
+                const waktu_selesai = new Date().toLocaleString("id-ID");
 
-  function renderHistori(filterNama = "all") {
-    const tbody = document.querySelector("#historiTabel tbody");
-    tbody.innerHTML = "";
-    historiData
-      .filter(item => filterNama === "all" || item.nama.toLowerCase() === filterNama.toLowerCase())
-      .forEach((item, index) => {
-        const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${item.nama}</td>
-          <td>${item.izin}</td>
-          <td>${item.mulai}</td>
-          <td>${item.selesai}</td>
-          <td>${item.durasi}</td>
-          <td class="${statusClass}">${item.status}</td>
-          <td><button class="btn-delete" onclick="hapusHistori(${index})">Hapus</button></td>
-        `;
-        tbody.appendChild(tr);
-    });
-  }
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "finish",
+                            nama,
+                            izin,
+                            mulai: waktu_mulai,
+                            selesai: waktu_selesai,
+                            durasi: durasiText,
+                            status: statusText
+                        })
+                    });
+                    if (!response.ok) {
+                        console.error("Kesalahan saat menyelesaikan izin:", response.status, response.statusText);
+                        throw new Error('Gagal menyelesaikan izin');
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    customAlert("⚠️ Gagal menyelesaikan izin. Periksa URL Apps Script Anda.");
+                }
 
-  function cariHistori() {
-    renderHistori(document.getElementById("filterNama").value);
-  }
+                ambilHistori();
+                ambilIzinAktif();
+            }
+        }
 
-  function exportToExcel() {
-    const table = document.getElementById("historiTabel");
-    const html = table.outerHTML.replace(/ /g, '%20');
-    const filename = 'Histori_Izin.xls';
-    const link = document.createElement('a');
-    link.href = 'data:application/vnd.ms-excel,' + html;
-    link.download = filename;
-    link.click();
-  }
+        async function hapusHistori(index) {
+            const pass = prompt("Masukkan Password untuk hapus data:");
+            if (pass !== DELETE_PASSWORD) {
+                customAlert("❌ Password salah!");
+                return;
+            }
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "delete", index: index, password: pass })
+                });
+                if (!response.ok) {
+                    console.error("Kesalahan saat menghapus histori:", response.status, response.statusText);
+                    throw new Error('Gagal menghapus histori');
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                customAlert("⚠️ Gagal menghapus histori. Periksa URL Apps Script Anda.");
+            }
+            ambilHistori();
+        }
 
-  // Ambil izin aktif (sedang berjalan) dari server
-  async function ambilIzinAktif() {
-    try {
-      const response = await fetch(SCRIPT_URL + "?action=aktif");
-      izinAktifData = await response.json();
-      renderIzinAktif();
-    } catch (err) {
-      console.error("Gagal ambil izin aktif:", err);
-    }
-  }
+        async function ambilHistori() {
+            try {
+                const response = await fetch(SCRIPT_URL + "?action=histori");
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                historiData = await response.json();
+                renderHistori();
+            } catch (err) {
+                console.error("Gagal ambil histori:", err);
+                const tbody = document.querySelector("#historiTabel tbody");
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-message">Gagal memuat histori. Periksa URL Apps Script atau koneksi Anda.</td></tr>`;
+                document.getElementById("noHistoriIzin").style.display = "none";
+            }
+        }
 
-  // Render tabel izin aktif
-  function renderIzinAktif() {
-    const tbody = document.querySelector("#izinAktifTable tbody");
-    tbody.innerHTML = "";
-    izinAktifData.forEach((item, index) => {
-      const mulaiTimestamp = new Date(item.mulai).getTime();
-      const now = Date.now();
-      const durasiDetik = Math.floor((now - mulaiTimestamp) / 1000);
-      const durasiText = formatMenitDetik(durasiDetik);
+        function renderHistori(filterNama = "all") {
+            const tbody = document.querySelector("#historiTabel tbody");
+            const noDataMsg = document.getElementById("noHistoriIzin");
+            tbody.innerHTML = "";
+            const filteredData = historiData.filter(item => filterNama === "all" || item.nama.toLowerCase() === filterNama.toLowerCase());
 
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${item.nama}</td>
-        <td>${item.izin}</td>
-        <td>${new Date(item.mulai).toLocaleString("id-ID")}</td>
-        <td>${durasiText}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+            if (filteredData.length === 0) {
+                noDataMsg.style.display = "block";
+            } else {
+                noDataMsg.style.display = "none";
+                filteredData.forEach((item, index) => {
+                    const statusClass = item.status.includes("Melebihi") ? "status-lebih" : "status-normal";
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${item.nama}</td>
+                        <td>${item.izin}</td>
+                        <td>${item.mulai}</td>
+                        <td>${item.selesai}</td>
+                        <td>${item.durasi}</td>
+                        <td class="${statusClass}">${item.status}</td>
+                        <td><button class="btn-delete" onclick="hapusHistori(${index})"><i class="fas fa-trash"></i></button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
 
-  // Update durasi izin aktif tiap detik
-  setInterval(() => {
-    if (izinAktifData.length > 0) {
-      renderIzinAktif();
-    }
-    // Update juga timer lokal jika ada izin aktif lokal
-    if (izinStarted) {
-      const now = Date.now();
-      const elapsed = Math.floor((now - startTime) / 1000);
-      document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
-    }
-  }, 1000);
+        function cariHistori() {
+            const filterNama = document.getElementById("filterNama").value;
+            renderHistori(filterNama);
+        }
 
-  window.onload = () => {
-    ambilHistori();
-    ambilIzinAktif();
+        function exportToExcel() {
+            const table = document.getElementById("historiTabel");
+            const html = table.outerHTML.replace(/ /g, '%20');
+            const filename = 'Histori_Izin.xls';
+            const link = document.createElement('a');
+            link.href = 'data:application/vnd.ms-excel,' + html;
+            link.download = filename;
+            link.click();
+        }
 
-    const savedNama = localStorage.getItem("namaDipilih");
-    const savedIzin = localStorage.getItem("izinDipilih");
-    if (savedNama) document.getElementById("nama").value = savedNama;
-    if (savedIzin) document.getElementById("izin").value = savedIzin;
-    if (localStorage.getItem("izinStarted") === "true") {
-      startTime = parseInt(localStorage.getItem("izinStartTime"));
-      izinStarted = true;
-      sudahDiperingatkan = false;
-      mulaiTimer();
-    }
-  };
-</script>
+        async function ambilIzinAktif() {
+            try {
+                const response = await fetch(SCRIPT_URL + "?action=aktif");
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                izinAktifData = await response.json();
+                renderIzinAktif();
+            } catch (err) {
+                console.error("Gagal ambil izin aktif:", err);
+                const tbody = document.querySelector("#izinAktifTable tbody");
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-message">Gagal memuat izin aktif. Periksa URL Apps Script atau koneksi Anda.</td></tr>`;
+                document.getElementById("noAktifIzin").style.display = "none";
+            }
+        }
 
+        function renderIzinAktif() {
+            const tbody = document.querySelector("#izinAktifTable tbody");
+            const noAktifDataMsg = document.getElementById("noAktifIzin");
+            tbody.innerHTML = "";
+
+            if (izinAktifData.length === 0) {
+                noAktifDataMsg.style.display = "block";
+            } else {
+                noAktifDataMsg.style.display = "none";
+                izinAktifData.forEach((item, index) => {
+                    const mulaiTimestamp = new Date(item.mulai).getTime();
+                    const now = Date.now();
+                    const durasiDetik = Math.floor((now - mulaiTimestamp) / 1000);
+                    const durasiText = formatMenitDetik(durasiDetik);
+                    const isOverdue = durasiDetik > 900;
+                    const durasiClass = isOverdue ? 'status-lebih' : '';
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${item.nama}</td>
+                        <td>${item.izin}</td>
+                        <td>${new Date(item.mulai).toLocaleString("id-ID")}</td>
+                        <td class="${durasiClass}">${durasiText}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        setInterval(() => {
+            if (izinAktifData.length > 0) {
+                renderIzinAktif();
+            }
+            if (izinStarted) {
+                const now = Date.now();
+                const elapsed = Math.floor((now - startTime) / 1000);
+                document.getElementById("waktuBerjalan").innerText = formatMenitDetik(elapsed);
+            }
+        }, 1000);
+
+        window.onload = () => {
+            ambilHistori();
+            ambilIzinAktif();
+
+            const savedNama = localStorage.getItem("namaDipilih");
+            const savedIzin = localStorage.getItem("izinDipilih");
+            if (savedNama) document.getElementById("nama").value = savedNama;
+            if (savedIzin) document.getElementById("izin").value = savedIzin;
+            if (localStorage.getItem("izinStarted") === "true") {
+                startTime = parseInt(localStorage.getItem("izinStartTime"));
+                izinStarted = true;
+                sudahDiperingatkan = false;
+                mulaiTimer();
+            }
+        };
+    </script>
 </body>
 </html>
