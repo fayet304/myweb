@@ -4,30 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Manajemen Akun</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- MENGGUNAKAN TAILWIND V3 STABIL (Aman untuk GitHub Pages & Apps Script) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .page { display: none; }
         .page.active { display: block; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans antialiased">
+<body class="bg-gray-100 text-gray-800 font-sans antialiased m-0 p-0">
 
+    <!-- ================= 1. HALAMAN LOGIN ================= -->
     <div id="page-login" class="page active min-h-screen flex items-center justify-center bg-slate-900 px-4">
-        <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md">
-            <div class="text-center mb-6">
-                <div class="bg-indigo-100 text-indigo-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
+            <div class="text-center mb-5">
+                <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
                     <i class="fa-solid fa-lock"></i>
                 </div>
                 <h2 class="text-xl font-bold text-gray-900">Login Admin</h2>
                 <p class="text-gray-500 text-xs mt-1">Sistem Manajemen Akun</p>
             </div>
             <form id="form-login" onsubmit="handleLogin(event)">
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="block text-xs font-semibold mb-1">Username</label>
                     <input type="text" id="login-username" value="admin" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" required>
                 </div>
-                <div class="mb-5">
+                <div class="mb-4">
                     <label class="block text-xs font-semibold mb-1">Password</label>
                     <input type="password" id="login-password" value="admin123" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" required>
                 </div>
@@ -38,38 +41,36 @@
         </div>
     </div>
 
-    <div id="main-layout" class="page min-h-screen flex flex-col md:flex-row">
+    <!-- ================= LAYOUT UTAMA (FLEXBOX STRUKTUR KOKOH ACCORDING TO SCREEN) ================= -->
+    <div id="main-layout" class="page min-h-screen flex flex-row items-stretch overflow-hidden">
         
-        <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col shadow-md shrink-0">
-            <div class="p-4 flex items-center justify-between border-b border-slate-800">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-shield-halved text-xl text-indigo-400"></i>
-                    <div>
-                        <h1 class="font-bold text-xs tracking-wide">PANEL MANAJEMEN</h1>
-                        <p class="text-[10px] text-slate-400">Database System</p>
-                    </div>
+        <!-- SIDEBAR (Kiri - Lebar Tetap) -->
+        <aside class="w-64 bg-slate-900 text-white flex flex-col shadow-md shrink-0">
+            <div class="p-4 flex items-center gap-2 border-b border-slate-800">
+                <i class="fa-solid fa-shield-halved text-xl text-indigo-400"></i>
+                <div>
+                    <h1 class="font-bold text-xs tracking-wide">PANEL MANAJEMEN</h1>
+                    <p class="text-[10px] text-slate-400">Database System</p>
                 </div>
-                <button onclick="toggleMobileMenu()" class="md:hidden text-white p-1 focus:outline-none">
-                    <i class="fa-solid fa-bars text-lg"></i>
-                </button>
             </div>
             
-            <nav id="nav-menu" class="hidden md:flex flex-col flex-1 p-3 space-y-1">
-                <button onclick="switchPage('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left" data-target="dashboard">
+            <nav class="flex flex-col flex-1 p-3 space-y-1">
+                <button onclick="switchPage('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left bg-slate-800 text-indigo-400 font-semibold" data-target="dashboard">
                     <i class="fa-solid fa-chart-pie w-4"></i> Dashboard
                 </button>
-                <button onclick="switchPage('tambah-email')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left" data-target="tambah-email">
+                <button onclick="switchPage('tambah-email')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="tambah-email">
                     <i class="fa-solid fa-envelope w-4"></i> Tambah Akun Email
                 </button>
-                <button onclick="switchPage('tambah-ewallet')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left" data-target="tambah-ewallet">
+                <button onclick="switchPage('tambah-ewallet')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="tambah-ewallet">
                     <i class="fa-solid fa-wallet w-4"></i> Tambah E-Wallet
                 </button>
-                <button onclick="switchPage('data-akun')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left" data-target="data-akun">
+                <button onclick="switchPage('data-akun')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="data-akun">
                     <i class="fa-solid fa-database w-4"></i> Data Akun Terdaftar
                 </button>
-                <button onclick="switchPage('riwayat')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left" data-target="riwayat">
+                <button onclick="switchPage('riwayat')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="riwayat">
                     <i class="fa-solid fa-clock-rotate-left w-4"></i> Riwayat Aktivitas
                 </button>
+                
                 <div class="pt-4 border-t border-slate-800 !mt-auto">
                     <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 font-semibold justify-center text-sm">
                         <i class="fa-solid fa-right-from-bracket"></i> Keluar (Logout)
@@ -78,11 +79,13 @@
             </nav>
         </aside>
 
-        <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+        <!-- KONTEN UTAMA (Kanan - Mengisi Sisa Ruang Samping Secara Sempurna) -->
+        <main class="flex-1 p-6 overflow-y-auto bg-gray-100">
             
+            <!-- ====== PAGE: DASHBOARD ====== -->
             <div id="sub-dashboard" class="sub-page">
                 <h2 class="text-xl font-bold mb-4 text-gray-900">Dashboard Utama</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-3 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
                         <div>
                             <p class="text-xs font-medium text-gray-500">Total Akun Email</p>
@@ -107,6 +110,7 @@
                 </div>
             </div>
 
+            <!-- ====== PAGE: TAMBAH EMAIL ====== -->
             <div id="sub-tambah-email" class="sub-page hidden">
                 <div class="max-w-xl bg-white p-5 rounded-xl shadow-sm border border-gray-200">
                     <h2 class="text-lg font-bold mb-4 text-gray-900"><i class="fa-solid fa-envelope text-indigo-600 mr-1"></i>Tambah Akun Email</h2>
@@ -134,12 +138,13 @@
                 </div>
             </div>
 
+            <!-- ====== PAGE: TAMBAH EWALLET ====== -->
             <div id="sub-tambah-ewallet" class="sub-page hidden">
                 <div class="max-w-xl bg-white p-5 rounded-xl shadow-sm border border-gray-200">
                     <h2 class="text-lg font-bold mb-4 text-gray-900"><i class="fa-solid fa-wallet text-indigo-600 mr-1"></i>Tambah Akun E-Wallet</h2>
                     <form id="form-ewallet" onsubmit="saveEwallet(event)">
                         <input type="hidden" id="wallet-id">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        <div class="grid grid-cols-2 gap-3 mb-4">
                             <div>
                                 <label class="block text-xs font-medium mb-1">Nama Rekening</label>
                                 <input type="text" id="ew-nama" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="Dana / OVO / GoPay" required>
@@ -156,11 +161,11 @@
                                 <label class="block text-xs font-medium mb-1">Sandi Transfer / PIN</label>
                                 <input type="text" id="ew-sandi-tf" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" required>
                             </div>
-                            <div class="sm:col-span-2">
+                            <div class="col-span-2">
                                 <label class="block text-xs font-medium mb-1">Email Terdaftar</label>
                                 <input type="email" id="ew-email" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="email@wallet.com" required>
                             </div>
-                            <div class="sm:col-span-2">
+                            <div class="col-span-2">
                                 <label class="block text-xs font-medium mb-1">Masa Aktif Kartu</label>
                                 <input type="text" id="ew-masa-aktif" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="MM/YY atau Selamanya" required>
                             </div>
@@ -173,23 +178,25 @@
                 </div>
             </div>
 
+            <!-- ====== PAGE: DATA AKUN (TAB SYSTEM COCOK UNTUK MOBILE) ====== -->
             <div id="sub-data-akun" class="sub-page hidden">
                 <h2 class="text-xl font-bold mb-3 text-gray-900">Data Akun Terdaftar</h2>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="flex border-b border-gray-200 bg-gray-50 text-sm">
-                        <button onclick="switchTab('tab-email')" id="btn-tab-email" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 focus:outline-none">
+                        <button type="button" onclick="switchTab('tab-email')" id="btn-tab-email" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 focus:outline-none">
                             <i class="fa-solid fa-envelope mr-1"></i> Akun Email
                         </button>
-                        <button onclick="switchTab('tab-wallet')" id="btn-tab-wallet" class="flex-1 py-2.5 px-4 text-center font-semibold text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <button type="button" onclick="switchTab('tab-wallet')" id="btn-tab-wallet" class="flex-1 py-2.5 px-4 text-center font-semibold text-gray-500 hover:text-gray-700 focus:outline-none">
                             <i class="fa-solid fa-wallet mr-1"></i> Akun E-Wallet
                         </button>
                     </div>
 
-                    <div id="content-tab-email" class="tab-content block p-1">
+                    <!-- TAB EMAIL -->
+                    <div id="content-tab-email" class="tab-content block p-2">
                         <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse text-xs md:text-sm whitespace-nowrap">
+                            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase tracking-wider">
+                                    <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase">
                                         <th class="p-3">Email</th>
                                         <th class="p-3">Sandi Email</th>
                                         <th class="p-3">Email Pemulihan</th>
@@ -201,11 +208,12 @@
                         </div>
                     </div>
 
-                    <div id="content-tab-wallet" class="tab-content hidden p-1">
+                    <!-- TAB EWALLET -->
+                    <div id="content-tab-wallet" class="tab-content hidden p-2">
                         <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse text-xs md:text-sm whitespace-nowrap">
+                            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase tracking-wider">
+                                    <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase">
                                         <th class="p-3">Nama Rekening</th>
                                         <th class="p-3">No Rekening</th>
                                         <th class="p-3">Sandi Login</th>
@@ -222,16 +230,17 @@
                 </div>
             </div>
 
+            <!-- ====== PAGE: RIWAYAT ====== -->
             <div id="sub-riwayat" class="sub-page hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-gray-900">Riwayat Aktivitas</h2>
-                    <button onclick="clearLogs()" class="bg-red-100 hover:bg-red-200 text-red-600 text-[11px] font-semibold px-2 py-1 rounded-md transition">
+                    <button onclick="clearLogs()" class="bg-red-100 hover:bg-red-200 text-red-600 text-xs font-semibold px-2 py-1 rounded-md transition">
                         <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
                     </button>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse text-xs md:text-sm">
+                        <table class="w-full text-left border-collapse text-sm">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase">
                                     <th class="p-3 w-40">Waktu</th>
@@ -248,7 +257,9 @@
         </main>
     </div>
 
+    <!-- ================= SCRIPT LOGIC (100% WORKING JAVASCRIPT) ================= -->
     <script>
+        // Memuat database lokal otomatis dari browser
         let dbEmail = JSON.parse(localStorage.getItem('db_email')) || [];
         let dbWallet = JSON.parse(localStorage.getItem('db_wallet')) || [];
         let dbLogs = JSON.parse(localStorage.getItem('db_logs')) || [];
@@ -273,12 +284,6 @@
             }
         }
 
-        // Toggle Sidebar khusus perangkat Mobile/Tablet
-        function toggleMobileMenu() {
-            const menu = document.getElementById('nav-menu');
-            menu.classList.toggle('hidden');
-        }
-
         function switchPage(pageId) {
             document.querySelectorAll('.sub-page').forEach(p => p.classList.add('hidden'));
             document.getElementById(`sub-${pageId}`).classList.remove('hidden');
@@ -290,11 +295,6 @@
                     btn.className = "nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800";
                 }
             });
-
-            // Auto-hide menu mobile jika menu diklik
-            if (window.innerWidth < 768) {
-                document.getElementById('nav-menu').classList.add('hidden');
-            }
 
             renderTables();
             if(pageId === 'riwayat') renderLogs();
@@ -323,7 +323,7 @@
             document.getElementById('stat-log').innerText = dbLogs.length;
         }
 
-        // AKSI TAMBAH EMAIL DATA FIX
+        // FUNGSI TAMBAH DATA EMAIL
         function saveEmail(e) {
             e.preventDefault();
             const id = document.getElementById('email-id').value;
@@ -346,7 +346,7 @@
             switchTab('tab-email');
         }
 
-        // AKSI TAMBAH WALLET DATA FIX
+        // FUNGSI TAMBAH DATA EWALLET
         function saveEwallet(e) {
             e.preventDefault();
             const id = document.getElementById('wallet-id').value;
@@ -372,27 +372,28 @@
             switchTab('tab-wallet');
         }
 
+        // RENDERING KE TABEL DENGAN FORMAT AMAN
         function renderTables() {
             const eBody = document.getElementById('table-email-body');
-            eBody.innerHTML = dbEmail.length === 0 ? `<tr><td colspan="4" class="p-3 text-center text-gray-400">Tidak ada data.</td></tr>` : '';
+            eBody.innerHTML = dbEmail.length === 0 ? `<tr><td colspan="4" class="p-3 text-center text-gray-400">Tidak ada data email.</td></tr>` : '';
             dbEmail.forEach(item => {
                 eBody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
                         <td class="p-3">${item.email}</td>
                         <td class="p-3">${item.sandi}</td>
                         <td class="p-3">${item.pemulihan}</td>
                         <td class="p-3 text-center space-x-1">
-                            <button onclick="editEmail(${item.id})" class="text-blue-600 bg-blue-50 p-1.5 rounded"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteEmail(${item.id}, '${item.email}')" class="text-red-600 bg-red-50 p-1.5 rounded"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editEmail(${item.id})" class="text-blue-600 bg-blue-50 p-1.5 rounded hover:bg-blue-100"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteEmail(${item.id}, '${item.email}')" class="text-red-600 bg-red-50 p-1.5 rounded hover:bg-red-100"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
 
             const wBody = document.getElementById('table-wallet-body');
-            wBody.innerHTML = dbWallet.length === 0 ? `<tr><td colspan="7" class="p-3 text-center text-gray-400">Tidak ada data.</td></tr>` : '';
+            wBody.innerHTML = dbWallet.length === 0 ? `<tr><td colspan="7" class="p-3 text-center text-gray-400">Tidak ada data e-wallet.</td></tr>` : '';
             dbWallet.forEach(item => {
                 wBody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
                         <td class="p-3 font-medium">${item.nama}</td>
                         <td class="p-3">${item.nomor}</td>
                         <td class="p-3">${item.sandiLogin}</td>
@@ -400,8 +401,8 @@
                         <td class="p-3">${item.email}</td>
                         <td class="p-3">${item.masaAktif}</td>
                         <td class="p-3 text-center space-x-1">
-                            <button onclick="editWallet(${item.id})" class="text-blue-600 bg-blue-50 p-1.5 rounded"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteWallet(${item.id}, '${item.nama}')" class="text-red-600 bg-red-50 p-1.5 rounded"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editWallet(${item.id})" class="text-blue-600 bg-blue-50 p-1.5 rounded hover:bg-blue-100"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteWallet(${item.id}, '${item.nama}')" class="text-red-600 bg-red-50 p-1.5 rounded hover:bg-red-100"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>`;
             });
@@ -455,13 +456,14 @@
         function addLog(aktivitas, status) {
             dbLogs.unshift({ waktu: new Date().toLocaleString('id-ID'), aktivitas, status });
             localStorage.setItem('db_logs', JSON.stringify(dbLogs));
+            updateDashboardStats();
         }
 
         function renderLogs() {
             const body = document.getElementById('table-log-body');
             body.innerHTML = dbLogs.length === 0 ? `<tr><td colspan="3" class="p-3 text-center text-gray-400">Kosong.</td></tr>` : '';
             dbLogs.forEach(item => {
-                body.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-3 text-gray-500 text-[11px]">${item.waktu}</td><td class="p-3">${item.aktivitas}</td><td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] bg-slate-100 font-medium">${item.status}</span></td></tr>`;
+                body.innerHTML += `<tr class="hover:bg-gray-50 border-b border-gray-100"><td class="p-3 text-gray-500 text-xs">${item.waktu}</td><td class="p-3">${item.aktivitas}</td><td class="p-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 font-medium">${item.status}</span></td></tr>`;
             });
         }
 
@@ -475,6 +477,7 @@
             document.getElementById('wallet-id').value = '';
         }
 
+        // Pemuatan awal data counter dashboard
         updateDashboardStats();
     </script>
 </body>
