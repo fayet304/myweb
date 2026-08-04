@@ -1,484 +1,105 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Manajemen Akun</title>
-    <!-- MENGGUNAKAN TAILWIND V3 STABIL (Aman untuk GitHub Pages & Apps Script) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .page { display: none; }
-        .page.active { display: block; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kios Absensi Barcode</title>
+  <!-- Library html5-qrcode -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
+    .container { width: 100%; max-width: 480px; background: #1e293b; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
+    h2 { margin-bottom: 8px; color: #38bdf8; font-size: 1.5rem; }
+    p.subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; }
+    #reader { width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid #334155; }
+    #status-box { margin-top: 20px; padding: 16px; border-radius: 12px; font-weight: 600; font-size: 1.1rem; display: none; }
+    .status-masuk { background-color: #065f46; color: #34d399; border: 1px solid #059669; }
+    .status-pulang { background-color: #1e40af; color: #60a5fa; border: 1px solid #2563eb; }
+    .status-warning { background-color: #854d0e; color: #facc15; border: 1px solid #ca8a04; }
+    .status-error { background-color: #991b1b; color: #f87171; border: 1px solid #dc2626; }
+    .loading { color: #38bdf8; font-size: 0.95rem; margin-top: 15px; display: none; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans antialiased m-0 p-0">
+<body>
 
-    <!-- ================= 1. HALAMAN LOGIN ================= -->
-    <div id="page-login" class="page active min-h-screen flex items-center justify-center bg-slate-900 px-4">
-        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm">
-            <div class="text-center mb-5">
-                <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
-                    <i class="fa-solid fa-lock"></i>
-                </div>
-                <h2 class="text-xl font-bold text-gray-900">Login Admin</h2>
-                <p class="text-gray-500 text-xs mt-1">Sistem Manajemen Akun</p>
-            </div>
-            <form id="form-login" onsubmit="handleLogin(event)">
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold mb-1">Username</label>
-                    <input type="text" id="login-username" value="admin" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold mb-1">Password</label>
-                    <input type="password" id="login-password" value="admin123" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" required>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition text-sm">
-                    Masuk <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
-            </form>
-        </div>
-    </div>
+<div class="container">
+  <h2>KIOS ABSENSI</h2>
+  <p class="subtitle">Arahkan barcode ID Card ke kamera</p>
+  
+  <div id="reader"></div>
+  <div id="loading" class="loading">Memproses data...</div>
+  <div id="status-box"></div>
+</div>
 
-    <!-- ================= LAYOUT UTAMA (FLEXBOX STRUKTUR KOKOH ACCORDING TO SCREEN) ================= -->
-    <div id="main-layout" class="page min-h-screen flex flex-row items-stretch overflow-hidden">
-        
-        <!-- SIDEBAR (Kiri - Lebar Tetap) -->
-        <aside class="w-64 bg-slate-900 text-white flex flex-col shadow-md shrink-0">
-            <div class="p-4 flex items-center gap-2 border-b border-slate-800">
-                <i class="fa-solid fa-shield-halved text-xl text-indigo-400"></i>
-                <div>
-                    <h1 class="font-bold text-xs tracking-wide">PANEL MANAJEMEN</h1>
-                    <p class="text-[10px] text-slate-400">Database System</p>
-                </div>
-            </div>
-            
-            <nav class="flex flex-col flex-1 p-3 space-y-1">
-                <button onclick="switchPage('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left bg-slate-800 text-indigo-400 font-semibold" data-target="dashboard">
-                    <i class="fa-solid fa-chart-pie w-4"></i> Dashboard
-                </button>
-                <button onclick="switchPage('tambah-email')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="tambah-email">
-                    <i class="fa-solid fa-envelope w-4"></i> Tambah Akun Email
-                </button>
-                <button onclick="switchPage('tambah-ewallet')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="tambah-ewallet">
-                    <i class="fa-solid fa-wallet w-4"></i> Tambah E-Wallet
-                </button>
-                <button onclick="switchPage('data-akun')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="data-akun">
-                    <i class="fa-solid fa-database w-4"></i> Data Akun Terdaftar
-                </button>
-                <button onclick="switchPage('riwayat')" class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800" data-target="riwayat">
-                    <i class="fa-solid fa-clock-rotate-left w-4"></i> Riwayat Aktivitas
-                </button>
-                
-                <div class="pt-4 border-t border-slate-800 !mt-auto">
-                    <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 font-semibold justify-center text-sm">
-                        <i class="fa-solid fa-right-from-bracket"></i> Keluar (Logout)
-                    </button>
-                </div>
-            </nav>
-        </aside>
+<script>
+  // GANTI URL DI BAWAH INI DENGAN WEB APP URL DARI GOOGLE APPS SCRIPT
+  const SCRIPT_URL = "URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI";
 
-        <!-- KONTEN UTAMA (Kanan - Mengisi Sisa Ruang Samping Secara Sempurna) -->
-        <main class="flex-1 p-6 overflow-y-auto bg-gray-100">
-            
-            <!-- ====== PAGE: DASHBOARD ====== -->
-            <div id="sub-dashboard" class="sub-page">
-                <h2 class="text-xl font-bold mb-4 text-gray-900">Dashboard Utama</h2>
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-gray-500">Total Akun Email</p>
-                            <h3 id="stat-email" class="text-2xl font-bold mt-1 text-gray-900">0</h3>
-                        </div>
-                        <div class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i class="fa-solid fa-envelope"></i></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-gray-500">Total E-Wallet</p>
-                            <h3 id="stat-wallet" class="text-2xl font-bold mt-1 text-gray-900">0</h3>
-                        </div>
-                        <div class="p-2 bg-green-100 text-green-600 rounded-lg"><i class="fa-solid fa-wallet"></i></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-medium text-gray-500">Log Aktivitas</p>
-                            <h3 id="stat-log" class="text-2xl font-bold mt-1 text-gray-900">0</h3>
-                        </div>
-                        <div class="p-2 bg-purple-100 text-purple-600 rounded-lg"><i class="fa-solid fa-list"></i></div>
-                    </div>
-                </div>
-            </div>
+  let isScanningAllowed = true;
 
-            <!-- ====== PAGE: TAMBAH EMAIL ====== -->
-            <div id="sub-tambah-email" class="sub-page hidden">
-                <div class="max-w-xl bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold mb-4 text-gray-900"><i class="fa-solid fa-envelope text-indigo-600 mr-1"></i>Tambah Akun Email</h2>
-                    <form id="form-email" onsubmit="saveEmail(event)">
-                        <input type="hidden" id="email-id">
-                        <div class="space-y-3 mb-4">
-                            <div>
-                                <label class="block text-xs font-medium mb-1">Email</label>
-                                <input type="email" id="em-email" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="contoh@gmail.com" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium mb-1">Sandi Email</label>
-                                <input type="text" id="em-sandi" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium mb-1">Email Pemulihan</label>
-                                <input type="email" id="em-pemulihan" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="recovery@gmail.com" required>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Simpan Akun</button>
-                            <button type="button" onclick="resetForm('form-email')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition">Batal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+  function onScanSuccess(decodedText) {
+    if (!isScanningAllowed) return;
+    
+    isScanningAllowed = false; // Pause scan sejenak agar tidak spamming request
+    showLoading(true);
+    hideStatus();
 
-            <!-- ====== PAGE: TAMBAH EWALLET ====== -->
-            <div id="sub-tambah-ewallet" class="sub-page hidden">
-                <div class="max-w-xl bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                    <h2 class="text-lg font-bold mb-4 text-gray-900"><i class="fa-solid fa-wallet text-indigo-600 mr-1"></i>Tambah Akun E-Wallet</h2>
-                    <form id="form-ewallet" onsubmit="saveEwallet(event)">
-                        <input type="hidden" id="wallet-id">
-                        <div class="grid grid-cols-2 gap-3 mb-4">
-                            <div>
-                                <label class="block text-xs font-medium mb-1">Nama Rekening</label>
-                                <input type="text" id="ew-nama" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="Dana / OVO / GoPay" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium mb-1">Nomor Rekening / HP</label>
-                                <input type="text" id="ew-nomor" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="08123xxxx" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium mb-1">Sandi Login</label>
-                                <input type="text" id="ew-sandi-login" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium mb-1">Sandi Transfer / PIN</label>
-                                <input type="text" id="ew-sandi-tf" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" required>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="block text-xs font-medium mb-1">Email Terdaftar</label>
-                                <input type="email" id="ew-email" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="email@wallet.com" required>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="block text-xs font-medium mb-1">Masa Aktif Kartu</label>
-                                <input type="text" id="ew-masa-aktif" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm focus:outline-none" placeholder="MM/YY atau Selamanya" required>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Simpan E-Wallet</button>
-                            <button type="button" onclick="resetForm('form-ewallet')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition">Batal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ idCard: decodedText })
+    })
+    .then(res => res.json())
+    .then(data => {
+      showLoading(false);
+      if (data.status === "success") {
+        const cls = data.type === "MASUK" ? "status-masuk" : "status-pulang";
+        showStatus(`[${data.type}] ID: ${data.id}<br>${data.message} (${data.time})`, cls);
+      } else if (data.status === "warning") {
+        showStatus(data.message, "status-warning");
+      } else {
+        showStatus("Gagal: " + data.message, "status-error");
+      }
+      
+      // Delay 3 detik sebelum scanner bisa membaca barcode berikutnya
+      setTimeout(() => {
+        isScanningAllowed = true;
+        hideStatus();
+      }, 3000);
+    })
+    .catch(err => {
+      showLoading(false);
+      showStatus("Terjadi kesalahan koneksi!", "status-error");
+      setTimeout(() => { isScanningAllowed = true; hideStatus(); }, 3000);
+    });
+  }
 
-            <!-- ====== PAGE: DATA AKUN (TAB SYSTEM COCOK UNTUK MOBILE) ====== -->
-            <div id="sub-data-akun" class="sub-page hidden">
-                <h2 class="text-xl font-bold mb-3 text-gray-900">Data Akun Terdaftar</h2>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="flex border-b border-gray-200 bg-gray-50 text-sm">
-                        <button type="button" onclick="switchTab('tab-email')" id="btn-tab-email" class="flex-1 py-2.5 px-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 focus:outline-none">
-                            <i class="fa-solid fa-envelope mr-1"></i> Akun Email
-                        </button>
-                        <button type="button" onclick="switchTab('tab-wallet')" id="btn-tab-wallet" class="flex-1 py-2.5 px-4 text-center font-semibold text-gray-500 hover:text-gray-700 focus:outline-none">
-                            <i class="fa-solid fa-wallet mr-1"></i> Akun E-Wallet
-                        </button>
-                    </div>
+  function showLoading(show) {
+    document.getElementById("loading").style.display = show ? "block" : "none";
+  }
 
-                    <!-- TAB EMAIL -->
-                    <div id="content-tab-email" class="tab-content block p-2">
-                        <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
-                                <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase">
-                                        <th class="p-3">Email</th>
-                                        <th class="p-3">Sandi Email</th>
-                                        <th class="p-3">Email Pemulihan</th>
-                                        <th class="p-3 text-center w-20">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-email-body" class="divide-y divide-gray-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
+  function showStatus(text, className) {
+    const box = document.getElementById("status-box");
+    box.innerHTML = text;
+    box.className = className;
+    box.style.display = "block";
+  }
 
-                    <!-- TAB EWALLET -->
-                    <div id="content-tab-wallet" class="tab-content hidden p-2">
-                        <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
-                                <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase">
-                                        <th class="p-3">Nama Rekening</th>
-                                        <th class="p-3">No Rekening</th>
-                                        <th class="p-3">Sandi Login</th>
-                                        <th class="p-3">Sandi Transfer</th>
-                                        <th class="p-3">Email Terdaftar</th>
-                                        <th class="p-3">Masa Aktif</th>
-                                        <th class="p-3 text-center w-20">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-wallet-body" class="divide-y divide-gray-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  function hideStatus() {
+    document.getElementById("status-box").style.display = "none";
+  }
 
-            <!-- ====== PAGE: RIWAYAT ====== -->
-            <div id="sub-riwayat" class="sub-page hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-900">Riwayat Aktivitas</h2>
-                    <button onclick="clearLogs()" class="bg-red-100 hover:bg-red-200 text-red-600 text-xs font-semibold px-2 py-1 rounded-md transition">
-                        <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
-                    </button>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200 font-semibold text-gray-600 uppercase">
-                                    <th class="p-3 w-40">Waktu</th>
-                                    <th class="p-3">Aktivitas</th>
-                                    <th class="p-3 w-24">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-log-body" class="divide-y divide-gray-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+  // Inisialisasi Scanner
+  const html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1.0
+  }, false);
 
-        </main>
-    </div>
+  html5QrcodeScanner.render(onScanSuccess);
+</script>
 
-    <!-- ================= SCRIPT LOGIC (100% WORKING JAVASCRIPT) ================= -->
-    <script>
-        // Memuat database lokal otomatis dari browser
-        let dbEmail = JSON.parse(localStorage.getItem('db_email')) || [];
-        let dbWallet = JSON.parse(localStorage.getItem('db_wallet')) || [];
-        let dbLogs = JSON.parse(localStorage.getItem('db_logs')) || [];
-
-        function handleLogin(e) {
-            e.preventDefault();
-            if (document.getElementById('login-username').value === "admin" && document.getElementById('login-password').value === "admin123") {
-                document.getElementById('page-login').classList.remove('active');
-                document.getElementById('main-layout').classList.add('active');
-                addLog("Admin login ke sistem", "Sukses");
-                switchPage('dashboard');
-            } else {
-                alert("Username/Password salah!");
-            }
-        }
-
-        function handleLogout() {
-            if(confirm("Keluar dari aplikasi?")) {
-                addLog("Admin keluar dari sistem", "Info");
-                document.getElementById('main-layout').classList.remove('active');
-                document.getElementById('page-login').classList.add('active');
-            }
-        }
-
-        function switchPage(pageId) {
-            document.querySelectorAll('.sub-page').forEach(p => p.classList.add('hidden'));
-            document.getElementById(`sub-${pageId}`).classList.remove('hidden');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.getAttribute('data-target') === pageId) {
-                    btn.className = "nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left bg-slate-800 text-indigo-400 font-semibold";
-                } else {
-                    btn.className = "nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-left text-slate-300 hover:bg-slate-800";
-                }
-            });
-
-            renderTables();
-            if(pageId === 'riwayat') renderLogs();
-            updateDashboardStats();
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-            document.getElementById(`content-${tabId}`).classList.remove('hidden');
-
-            const btnE = document.getElementById('btn-tab-email');
-            const btnW = document.getElementById('btn-tab-wallet');
-
-            if(tabId === 'tab-email') {
-                btnE.className = "flex-1 py-2.5 px-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 focus:outline-none";
-                btnW.className = "flex-1 py-2.5 px-4 text-center font-semibold text-gray-500 hover:text-gray-700 focus:outline-none";
-            } else {
-                btnW.className = "flex-1 py-2.5 px-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 focus:outline-none";
-                btnE.className = "flex-1 py-2.5 px-4 text-center font-semibold text-gray-500 hover:text-gray-700 focus:outline-none";
-            }
-        }
-
-        function updateDashboardStats() {
-            document.getElementById('stat-email').innerText = dbEmail.length;
-            document.getElementById('stat-wallet').innerText = dbWallet.length;
-            document.getElementById('stat-log').innerText = dbLogs.length;
-        }
-
-        // FUNGSI TAMBAH DATA EMAIL
-        function saveEmail(e) {
-            e.preventDefault();
-            const id = document.getElementById('email-id').value;
-            const email = document.getElementById('em-email').value;
-            const sandi = document.getElementById('em-sandi').value;
-            const pemulihan = document.getElementById('em-pemulihan').value;
-
-            if (id) {
-                const idx = dbEmail.findIndex(item => item.id == id);
-                dbEmail[idx] = { id, email, sandi, pemulihan };
-                addLog(`Edit email: ${email}`, "Edit");
-            } else {
-                dbEmail.push({ id: Date.now(), email, sandi, pemulihan });
-                addLog(`Tambah email: ${email}`, "Tambah");
-            }
-
-            localStorage.setItem('db_email', JSON.stringify(dbEmail));
-            resetForm('form-email');
-            switchPage('data-akun');
-            switchTab('tab-email');
-        }
-
-        // FUNGSI TAMBAH DATA EWALLET
-        function saveEwallet(e) {
-            e.preventDefault();
-            const id = document.getElementById('wallet-id').value;
-            const nama = document.getElementById('ew-nama').value;
-            const nomor = document.getElementById('ew-nomor').value;
-            const sandiLogin = document.getElementById('ew-sandi-login').value;
-            const sandiTf = document.getElementById('ew-sandi-tf').value;
-            const email = document.getElementById('ew-email').value;
-            const masaAktif = document.getElementById('ew-masa-aktif').value;
-
-            if(id) {
-                const idx = dbWallet.findIndex(item => item.id == id);
-                dbWallet[idx] = { id, nama, nomor, sandiLogin, sandiTf, email, masaAktif };
-                addLog(`Edit wallet: ${nama}`, "Edit");
-            } else {
-                dbWallet.push({ id: Date.now(), nama, nomor, sandiLogin, sandiTf, email, masaAktif });
-                addLog(`Tambah wallet: ${nama}`, "Tambah");
-            }
-
-            localStorage.setItem('db_wallet', JSON.stringify(dbWallet));
-            resetForm('form-ewallet');
-            switchPage('data-akun');
-            switchTab('tab-wallet');
-        }
-
-        // RENDERING KE TABEL DENGAN FORMAT AMAN
-        function renderTables() {
-            const eBody = document.getElementById('table-email-body');
-            eBody.innerHTML = dbEmail.length === 0 ? `<tr><td colspan="4" class="p-3 text-center text-gray-400">Tidak ada data email.</td></tr>` : '';
-            dbEmail.forEach(item => {
-                eBody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="p-3">${item.email}</td>
-                        <td class="p-3">${item.sandi}</td>
-                        <td class="p-3">${item.pemulihan}</td>
-                        <td class="p-3 text-center space-x-1">
-                            <button onclick="editEmail(${item.id})" class="text-blue-600 bg-blue-50 p-1.5 rounded hover:bg-blue-100"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteEmail(${item.id}, '${item.email}')" class="text-red-600 bg-red-50 p-1.5 rounded hover:bg-red-100"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            });
-
-            const wBody = document.getElementById('table-wallet-body');
-            wBody.innerHTML = dbWallet.length === 0 ? `<tr><td colspan="7" class="p-3 text-center text-gray-400">Tidak ada data e-wallet.</td></tr>` : '';
-            dbWallet.forEach(item => {
-                wBody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="p-3 font-medium">${item.nama}</td>
-                        <td class="p-3">${item.nomor}</td>
-                        <td class="p-3">${item.sandiLogin}</td>
-                        <td class="p-3">${item.sandiTf}</td>
-                        <td class="p-3">${item.email}</td>
-                        <td class="p-3">${item.masaAktif}</td>
-                        <td class="p-3 text-center space-x-1">
-                            <button onclick="editWallet(${item.id})" class="text-blue-600 bg-blue-50 p-1.5 rounded hover:bg-blue-100"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteWallet(${item.id}, '${item.nama}')" class="text-red-600 bg-red-50 p-1.5 rounded hover:bg-red-100"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            });
-        }
-
-        function editEmail(id) {
-            const item = dbEmail.find(x => x.id == id);
-            if(item) {
-                document.getElementById('email-id').value = item.id;
-                document.getElementById('em-email').value = item.email;
-                document.getElementById('em-sandi').value = item.sandi;
-                document.getElementById('em-pemulihan').value = item.pemulihan;
-                switchPage('tambah-email');
-            }
-        }
-
-        function editWallet(id) {
-            const item = dbWallet.find(x => x.id == id);
-            if(item) {
-                document.getElementById('wallet-id').value = item.id;
-                document.getElementById('ew-nama').value = item.nama;
-                document.getElementById('ew-nomor').value = item.nomor;
-                document.getElementById('ew-sandi-login').value = item.sandiLogin;
-                document.getElementById('ew-sandi-tf').value = item.sandiTf;
-                document.getElementById('ew-email').value = item.email;
-                document.getElementById('ew-masa-aktif').value = item.masaAktif;
-                switchPage('tambah-ewallet');
-            }
-        }
-
-        function deleteEmail(id, name) {
-            if(confirm(`Hapus ${name}?`)) {
-                dbEmail = dbEmail.filter(i => i.id != id);
-                localStorage.setItem('db_email', JSON.stringify(dbEmail));
-                addLog(`Hapus email: ${name}`, "Hapus");
-                renderTables();
-                updateDashboardStats();
-            }
-        }
-
-        function deleteWallet(id, name) {
-            if(confirm(`Hapus ${name}?`)) {
-                dbWallet = dbWallet.filter(i => i.id != id);
-                localStorage.setItem('db_wallet', JSON.stringify(dbWallet));
-                addLog(`Hapus wallet: ${name}`, "Hapus");
-                renderTables();
-                updateDashboardStats();
-            }
-        }
-
-        function addLog(aktivitas, status) {
-            dbLogs.unshift({ waktu: new Date().toLocaleString('id-ID'), aktivitas, status });
-            localStorage.setItem('db_logs', JSON.stringify(dbLogs));
-            updateDashboardStats();
-        }
-
-        function renderLogs() {
-            const body = document.getElementById('table-log-body');
-            body.innerHTML = dbLogs.length === 0 ? `<tr><td colspan="3" class="p-3 text-center text-gray-400">Kosong.</td></tr>` : '';
-            dbLogs.forEach(item => {
-                body.innerHTML += `<tr class="hover:bg-gray-50 border-b border-gray-100"><td class="p-3 text-gray-500 text-xs">${item.waktu}</td><td class="p-3">${item.aktivitas}</td><td class="p-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 font-medium">${item.status}</span></td></tr>`;
-            });
-        }
-
-        function clearLogs() {
-            if(confirm("Hapus log?")) { dbLogs = []; localStorage.removeItem('db_logs'); renderLogs(); updateDashboardStats(); }
-        }
-
-        function resetForm(id) {
-            document.getElementById(id).reset();
-            document.getElementById('email-id').value = '';
-            document.getElementById('wallet-id').value = '';
-        }
-
-        // Pemuatan awal data counter dashboard
-        updateDashboardStats();
-    </script>
 </body>
 </html>
