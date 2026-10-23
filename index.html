@@ -15,19 +15,30 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
-    <!-- Header -->
+    <!-- Header & Navigation -->
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
                 <div class="bg-emerald-500 p-2.5 rounded-xl text-slate-900 font-bold text-xl shadow-lg">📊</div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white">Audit & Rekonsiliasi QRIS</h1>
+                    <h1 class="text-lg font-bold tracking-tight text-white">Audit & Rekonsiliasi QRIS</h1>
                     <p class="text-xs text-slate-400">Sistem Cutoff 23:30 • Pencocokan Otomatis</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="resetAllData()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow flex items-center space-x-1">
-                    <span>🗑️</span> <span>Reset Semua Data</span>
+
+            <!-- Tab Navigation Menu -->
+            <nav class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700">
+                <button id="tabNavDashboard" onclick="switchTab('dashboard')" class="px-4 py-2 text-xs font-semibold rounded-lg transition bg-emerald-500 text-slate-900 shadow">
+                    📊 Dashboard & Wishlist
+                </button>
+                <button id="tabNavHistory" onclick="switchTab('history')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg transition">
+                    📜 History & Detail Transaksi
+                </button>
+            </nav>
+
+            <div class="flex items-center space-x-2">
+                <button onclick="resetAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-semibold px-3 py-2 rounded-lg border border-rose-600/30 transition">
+                    🗑️ Reset Data
                 </button>
             </div>
         </div>
@@ -37,107 +48,173 @@
     <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
         <!-- Info Banner Persistent -->
-        <div class="bg-blue-950/50 border border-blue-800 text-blue-200 px-4 py-3 rounded-xl text-sm flex items-start space-x-3 shadow-inner">
+        <div class="bg-blue-950/50 border border-blue-800 text-blue-200 px-4 py-3 rounded-xl text-xs sm:text-sm flex items-start space-x-3 shadow-inner">
             <span class="text-xl">💡</span>
             <div>
-                <strong class="font-semibold">Cutoff QRIS Aktif (23:30 - 23:29):</strong> Sistem otomatis menyelaraskan waktu transaksi QRIS malam hari agar klop dengan pencatatan harian Admin. Data tersimpan aman di tablet Anda.
+                <strong class="font-semibold">Mode Tablet & Multi-Halaman:</strong> Data tersimpan aman di browser Anda. Gunakan tab **History & Detail Transaksi** untuk memfilter per User ID, ID Transaksi, atau mengekspor hasil audit ke CSV.
             </div>
         </div>
 
-        <!-- Section 1: Upload Panel -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Admin Data Upload -->
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-bold text-base text-white flex items-center space-x-2">
-                            <span>📂</span> <span>1. Master Data Admin (Bulanan)</span>
-                        </h2>
-                        <span id="adminStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300 font-medium">Belum Ada File</span>
+        <!-- ================= PAGE 1: DASHBOARD & WISHLIST ================= -->
+        <div id="pageDashboard" class="space-y-6">
+            <!-- Section 1: Upload Panel -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Admin Data Upload -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="font-bold text-base text-white flex items-center space-x-2">
+                                <span>📂</span> <span>1. Master Data Admin (Bulanan)</span>
+                            </h2>
+                            <span id="adminStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300 font-medium">Belum Ada File</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Unggah 1 file CSV admin untuk rentang sebulan penuh atau lebih.</p>
+                        
+                        <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
+                            <span class="text-3xl mb-2 group-hover:scale-110 transition">📄</span>
+                            <span class="text-xs font-semibold text-slate-300 text-center">Ketuk untuk memilih file CSV Admin</span>
+                            <input type="file" id="adminFile" accept=".csv" class="hidden" onchange="handleAdminUpload(event)">
+                        </label>
                     </div>
-                    <p class="text-xs text-slate-400 mb-4">Unggah 1 file CSV admin untuk rentang sebulan penuh atau lebih.</p>
-                    
-                    <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
-                        <span class="text-3xl mb-2 group-hover:scale-110 transition">📄</span>
-                        <span class="text-xs font-semibold text-slate-300 text-center">Ketuk untuk memilih file CSV Admin</span>
-                        <input type="file" id="adminFile" accept=".csv" class="hidden" onchange="handleAdminUpload(event)">
-                    </label>
+                    <div id="adminFileInfo" class="mt-4 text-xs text-slate-400 hidden bg-slate-900/80 p-3 rounded-xl border border-slate-700"></div>
                 </div>
-                <div id="adminFileInfo" class="mt-4 text-xs text-slate-400 hidden bg-slate-900/80 p-3 rounded-xl border border-slate-700"></div>
-            </div>
 
-            <!-- Settlement QRIS Upload -->
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-bold text-base text-white flex items-center space-x-2">
-                            <span>📥</span> <span>2. Settlement QRIS (Harian / Multi-File)</span>
-                        </h2>
-                        <span id="settleCountBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300 font-medium">0 File Tersimpan</span>
+                <!-- Settlement QRIS Upload -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="font-bold text-base text-white flex items-center space-x-2">
+                                <span>📥</span> <span>2. Settlement QRIS (Harian / Multi-File)</span>
+                            </h2>
+                            <span id="settleCountBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300 font-medium">0 File Tersimpan</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Pilih banyak file CSV settlement harian dari vendor sekaligus.</p>
+                        
+                        <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
+                            <span class="text-3xl mb-2 group-hover:scale-110 transition">📁</span>
+                            <span class="text-xs font-semibold text-slate-300 text-center">Ketuk untuk memilih File Settlement QRIS</span>
+                            <input type="file" id="settleFiles" accept=".csv" multiple class="hidden" onchange="handleSettlementUpload(event)">
+                        </label>
                     </div>
-                    <p class="text-xs text-slate-400 mb-4">Pilih banyak file CSV settlement harian dari vendor sekaligus.</p>
-                    
-                    <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
-                        <span class="text-3xl mb-2 group-hover:scale-110 transition">📁</span>
-                        <span class="text-xs font-semibold text-slate-300 text-center">Ketuk untuk memilih File Settlement QRIS</span>
-                        <input type="file" id="settleFiles" accept=".csv" multiple class="hidden" onchange="handleSettlementUpload(event)">
-                    </label>
+                    <div id="settleFileInfo" class="mt-4 text-xs text-slate-400 hidden bg-slate-900/80 p-3 rounded-xl border border-slate-700 max-h-24 overflow-y-auto"></div>
                 </div>
-                <div id="settleFileInfo" class="mt-4 text-xs text-slate-400 hidden bg-slate-900/80 p-3 rounded-xl border border-slate-700 max-h-24 overflow-y-auto"></div>
+            </div>
+
+            <!-- Section 2: Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Total Transaksi Admin</p>
+                    <h3 id="sumAdminTx" class="text-2xl font-bold text-white mt-1">0</h3>
+                    <p id="sumAdminNominal" class="text-xs text-emerald-400 font-medium mt-1">Rp 0</p>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Total Settlement QRIS</p>
+                    <h3 id="sumSettleTx" class="text-2xl font-bold text-white mt-1">0</h3>
+                    <p id="sumSettleNominal" class="text-xs text-blue-400 font-medium mt-1">Rp 0</p>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Total Fee MDR (~1.1%)</p>
+                    <h3 id="sumFeeNominal" class="text-2xl font-bold text-rose-400 mt-1">Rp 0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Potongan Vendor</p>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                    <p class="text-xs text-slate-400 uppercase font-semibold">Status Audit Global</p>
+                    <h3 id="globalAuditStatus" class="text-lg font-bold text-yellow-400 mt-1">Menunggu Data</h3>
+                    <p class="text-xs text-slate-400 mt-1">Cross-check harian</p>
+                </div>
+            </div>
+
+            <!-- Section 3: Wishlist Matrix -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-lg overflow-hidden">
+                <div class="p-5 border-b border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h2 class="font-bold text-base text-white">Wishlist & Rekonsiliasi Matriks Harian</h2>
+                        <p class="text-xs text-slate-400">Pencocokan otomatis omset admin harian dengan file settlement QRIS harian.</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-900/60 text-slate-400 text-xs uppercase border-b border-slate-700">
+                                <th class="p-3.5">Tanggal Transaksi</th>
+                                <th class="p-3.5 text-right">Jumlah Tx Admin</th>
+                                <th class="p-3.5 text-right">Total Gross Admin</th>
+                                <th class="p-3.5 text-right">Gross QRIS Settlement</th>
+                                <th class="p-3.5 text-right">Estimasi Fee MDR</th>
+                                <th class="p-3.5 text-right">Net Cair Bank</th>
+                                <th class="p-3.5 text-center">Status Audit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTableBody" class="divide-y divide-slate-700/50 text-slate-300">
+                            <tr>
+                                <td colspan="7" class="p-6 text-center text-slate-500">Silakan unggah file Master Admin terlebih dahulu.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Summary Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
-                <p class="text-xs text-slate-400 uppercase font-semibold">Total Transaksi Admin</p>
-                <h3 id="sumAdminTx" class="text-2xl font-bold text-white mt-1">0</h3>
-                <p id="sumAdminNominal" class="text-xs text-emerald-400 font-medium mt-1">Rp 0</p>
-            </div>
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
-                <p class="text-xs text-slate-400 uppercase font-semibold">Total Settlement QRIS</p>
-                <h3 id="sumSettleTx" class="text-2xl font-bold text-white mt-1">0</h3>
-                <p id="sumSettleNominal" class="text-xs text-blue-400 font-medium mt-1">Rp 0</p>
-            </div>
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
-                <p class="text-xs text-slate-400 uppercase font-semibold">Total Fee MDR (~1.1%)</p>
-                <h3 id="sumFeeNominal" class="text-2xl font-bold text-rose-400 mt-1">Rp 0</h3>
-                <p class="text-xs text-slate-500 mt-1">Potongan Vendor</p>
-            </div>
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
-                <p class="text-xs text-slate-400 uppercase font-semibold">Status Audit Global</p>
-                <h3 id="globalAuditStatus" class="text-lg font-bold text-yellow-400 mt-1">Menunggu Data</h3>
-                <p class="text-xs text-slate-400 mt-1">Cross-check harian</p>
-            </div>
-        </div>
+        <!-- ================= PAGE 2: HISTORY & DETAIL TRANSAKSI ================= -->
+        <div id="pageHistory" class="space-y-6 hidden">
+            <!-- Filter Control Bar -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="font-bold text-base text-white">📜 History Detail Transaksi Matched</h2>
+                        <p class="text-xs text-slate-400">Pencarian cepat dan pencatatan per item transaksi yang berhasil dicocokkan.</p>
+                    </div>
+                    <button onclick="exportHistoryToCSV()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center space-x-2">
+                        <span>📥</span> <span>Export CSV Hasil Audit</span>
+                    </button>
+                </div>
 
-        <!-- Section 3: Wishlist Matrix / Tabel Rekonsiliasi Harian -->
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-lg overflow-hidden">
-            <div class="p-5 border-b border-slate-700 flex justify-between items-center">
-                <div>
-                    <h2 class="font-bold text-base text-white">Wishlist & Rekonsiliasi Matriks Harian</h2>
-                    <p class="text-xs text-slate-400">Pencocokan otomatis omset admin harian dengan file settlement QRIS harian.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <!-- Search Input -->
+                    <div>
+                        <label class="text-xs text-slate-400 font-medium block mb-1">Cari Order ID / User ID</label>
+                        <input type="text" id="historySearch" oninput="filterHistoryTable()" placeholder="Ketik XPay... atau username..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <!-- Status Filter -->
+                    <div>
+                        <label class="text-xs text-slate-400 font-medium block mb-1">Status Pencocokan</label>
+                        <select id="historyFilterStatus" onchange="filterHistoryTable()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <option value="ALL">Semua Status (Matched & Unmatched)</option>
+                            <option value="MATCHED" selected>🟢 Hanya Matched (100% Klop)</option>
+                            <option value="UNMATCHED">🔴 Belum Ada di QRIS Settlement</option>
+                        </select>
+                    </div>
+                    <!-- Counter -->
+                    <div class="flex items-end">
+                        <div class="bg-slate-900/80 border border-slate-700 px-4 py-2 rounded-xl w-full text-xs text-slate-300">
+                            Menampilkan: <strong id="historyFilteredCount" class="text-emerald-400">0</strong> transaksi
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-900/60 text-slate-400 text-xs uppercase border-b border-slate-700">
-                            <th class="p-3.5">Tanggal Transaksi</th>
-                            <th class="p-3.5 text-right">Jumlah Tx Admin</th>
-                            <th class="p-3.5 text-right">Total Gross Admin</th>
-                            <th class="p-3.5 text-right">Gross QRIS Settlement</th>
-                            <th class="p-3.5 text-right">Estimasi Fee MDR</th>
-                            <th class="p-3.5 text-right">Net Cair Bank</th>
-                            <th class="p-3.5 text-center">Status Audit</th>
-                        </tr>
-                    </thead>
-                    <tbody id="matrixTableBody" class="divide-y divide-slate-700/50 text-slate-300">
-                        <tr>
-                            <td colspan="7" class="p-6 text-center text-slate-500">Silakan unggah file Master Admin terlebih dahulu.</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            <!-- Detailed History Table -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-lg overflow-hidden">
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="sticky top-0 bg-slate-900/90 backdrop-blur text-slate-400 uppercase border-b border-slate-700 z-10">
+                            <tr>
+                                <th class="p-3">Order ID / Rekening</th>
+                                <th class="p-3">User ID</th>
+                                <th class="p-3">Tanggal Admin</th>
+                                <th class="p-3 text-right">Nominal Admin</th>
+                                <th class="p-3 text-right">Nominal QRIS</th>
+                                <th class="p-3 text-right">Fee MDR</th>
+                                <th class="p-3 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="divide-y divide-slate-700/50 text-slate-300 font-mono">
+                            <tr>
+                                <td colspan="7" class="p-6 text-center text-slate-500">Belum ada data transaksi yang dimuat.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -147,6 +224,7 @@
     <script>
         let adminData = [];
         let settlementBatches = {};
+        let matchedHistoryData = []; // Menyimpan item terpadu untuk halaman History
 
         window.onload = function() {
             const savedAdmin = localStorage.getItem('audit_admin_data');
@@ -184,27 +262,24 @@
             }
         };
 
-        // Fungsi Smart Cutoff Tanggal QRIS (23:30:00 - 23:29:59)
-        function getQrisAdjustedDate(recordDateStr) {
-            if (!recordDateStr) return '';
-            try {
-                let cleanStr = recordDateStr.replace('+007', '').replace('+07:00', '');
-                let dt = new Date(cleanStr);
-                if (isNaN(dt.getTime())) return recordDateStr.split('T')[0];
+        // Switch Tab Navigation
+        function switchTab(tabName) {
+            const pageDashboard = document.getElementById('pageDashboard');
+            const pageHistory = document.getElementById('pageHistory');
+            const btnDash = document.getElementById('tabNavDashboard');
+            const btnHist = document.getElementById('tabNavHistory');
 
-                let hours = dt.getHours();
-                let minutes = dt.getMinutes();
-                let seconds = dt.getSeconds();
-                let timeInSeconds = (hours * 3600) + (minutes * 60) + seconds;
-                let cutoffStart = (23 * 3600) + (30 * 60); // 23:30:00
-
-                // Jika transaksi antara 23:30:00 dan 23:59:59, geser ke hari berikutnya agar klop dengan admin
-                if (timeInSeconds >= cutoffStart) {
-                    dt.setDate(dt.getDate() + 1);
-                }
-                return dt.toISOString().split('T')[0];
-            } catch(e) {
-                return recordDateStr.split('T')[0];
+            if (tabName === 'dashboard') {
+                pageDashboard.classList.remove('hidden');
+                pageHistory.classList.add('hidden');
+                btnDash.className = "px-4 py-2 text-xs font-semibold rounded-lg transition bg-emerald-500 text-slate-900 shadow";
+                btnHist.className = "px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg transition";
+            } else {
+                pageDashboard.classList.add('hidden');
+                pageHistory.classList.remove('hidden');
+                btnHist.className = "px-4 py-2 text-xs font-semibold rounded-lg transition bg-emerald-500 text-slate-900 shadow";
+                btnDash.className = "px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg transition";
+                renderHistoryTable();
             }
         }
 
@@ -314,6 +389,7 @@
             }, 100);
         }
 
+        // Core Reconciliation Engine & History Builder
         function runReconciliation() {
             if (!adminData.length) return;
 
@@ -321,25 +397,7 @@
             let totalAdminTxAll = 0;
             let totalAdminNominalAll = 0;
 
-            adminData.forEach(row => {
-                let tglRaw = row['Tanggal penerimaan'] || row['Tanggal'] || '';
-                let dateOnly = tglRaw.split(' ')[0];
-                if (!dateOnly || dateOnly.length < 10) return;
-
-                let amount = parseFloat(row['Jumlah'] || row['RECORD VALUE'] || 0);
-                let orderId = row['Dari Rekening Bank'] || row['PARTNER ID'] || '';
-
-                if (!adminByDate[dateOnly]) {
-                    adminByDate[dateOnly] = { count: 0, gross: 0, orderIds: new Set() };
-                }
-                adminByDate[dateOnly].count++;
-                adminByDate[dateOnly].gross += amount;
-                if (orderId) adminByDate[dateOnly].orderIds.add(orderId);
-
-                totalAdminTxAll++;
-                totalAdminNominalAll += amount;
-            });
-
+            // Kumpulkan semua Order ID dari Settlement QRIS
             let allSettlementOrderIds = new Map();
             let totalSettleTxAll = 0;
             let totalSettleGrossAll = 0;
@@ -352,7 +410,7 @@
                     let fee = parseFloat(row['RECORD FEE'] || row['RECORD_FEE'] || 0);
 
                     if (orderId) {
-                        allSettlementOrderIds.set(orderId, { gross: val, fee: fee });
+                        allSettlementOrderIds.set(orderId, { gross: val, fee: fee, fileName: fileName });
                         totalSettleTxAll++;
                         totalSettleGrossAll += val;
                         totalSettleFeeAll += fee;
@@ -360,12 +418,49 @@
                 });
             }
 
+            matchedHistoryData = [];
+
+            adminData.forEach(row => {
+                let tglRaw = row['Tanggal penerimaan'] || row['Tanggal'] || '';
+                let dateOnly = tglRaw.split(' ')[0];
+                if (!dateOnly || dateOnly.length < 10) return;
+
+                let amount = parseFloat(row['Jumlah'] || row['RECORD VALUE'] || 0);
+                let orderId = row['Dari Rekening Bank'] || row['PARTNER ID'] || '';
+                let userId = row['UserId'] || '-';
+
+                if (!adminByDate[dateOnly]) {
+                    adminByDate[dateOnly] = { count: 0, gross: 0, orderIds: new Set() };
+                }
+                adminByDate[dateOnly].count++;
+                adminByDate[dateOnly].gross += amount;
+                if (orderId) adminByDate[dateOnly].orderIds.add(orderId);
+
+                totalAdminTxAll++;
+                totalAdminNominalAll += amount;
+
+                // Bangun struktur detail untuk Halaman History
+                let isMatched = allSettlementOrderIds.has(orderId);
+                let qrisInfo = isMatched ? allSettlementOrderIds.get(orderId) : { gross: 0, fee: 0 };
+
+                matchedHistoryData.push({
+                    orderId: orderId,
+                    userId: userId,
+                    date: dateOnly,
+                    adminGross: amount,
+                    qrisGross: qrisInfo.gross,
+                    qrisFee: qrisInfo.fee,
+                    status: isMatched ? 'MATCHED' : 'UNMATCHED'
+                });
+            });
+
             document.getElementById('sumAdminTx').innerText = totalAdminTxAll.toLocaleString();
             document.getElementById('sumAdminNominal').innerText = `Rp ${totalAdminNominalAll.toLocaleString('id-ID')}`;
             document.getElementById('sumSettleTx').innerText = totalSettleTxAll.toLocaleString();
             document.getElementById('sumSettleNominal').innerText = `Rp ${totalSettleGrossAll.toLocaleString('id-ID')}`;
             document.getElementById('sumFeeNominal').innerText = `Rp ${totalSettleFeeAll.toLocaleString('id-ID')}`;
 
+            // Render Matriks Wishlist
             let sortedDates = Object.keys(adminByDate).sort();
             let html = '';
             let matchedDaysCount = 0;
@@ -418,6 +513,89 @@
                 document.getElementById('globalAuditStatus').innerText = `${matchedDaysCount} Tanggal Klop`;
                 document.getElementById('globalAuditStatus').className = "text-lg font-bold text-emerald-400 mt-1";
             }
+
+            renderHistoryTable();
+        }
+
+        // Render & Filter Tabel History
+        function renderHistoryTable() {
+            if (!matchedHistoryData.length) return;
+
+            const searchQuery = document.getElementById('historySearch').value.toLowerCase().trim();
+            const statusFilter = document.getElementById('historyFilterStatus').value;
+
+            let filtered = matchedHistoryData.filter(item => {
+                let matchSearch = item.orderId.toLowerCase().includes(searchQuery) || item.userId.toLowerCase().includes(searchQuery);
+                let matchStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                return matchSearch && matchStatus;
+            });
+
+            document.getElementById('historyFilteredCount').innerText = filtered.length.toLocaleString();
+
+            let html = '';
+            // Tampilkan maksimal 500 baris pertama untuk kecepatan render browser tablet
+            let displayList = filtered.slice(0, 500);
+
+            displayList.forEach(item => {
+                let badge = item.status === 'MATCHED' 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">MATCHED</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-400 font-semibold">UNMATCHED</span>`;
+
+                html += `
+                    <tr class="hover:bg-slate-700/30 transition">
+                        <td class="p-3 font-semibold text-white">${item.orderId}</td>
+                        <td class="p-3 text-slate-300">${item.userId}</td>
+                        <td class="p-3 text-slate-400">${item.date}</td>
+                        <td class="p-3 text-right text-emerald-400">Rp ${item.adminGross.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right text-blue-400">Rp ${item.qrisGross.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right text-rose-400">Rp ${item.qrisFee.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center">${badge}</td>
+                    </tr>
+                `;
+            });
+
+            if (filtered.length === 0) {
+                html = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Tidak ada transaksi yang cocok dengan filter pencarian.</td></tr>`;
+            }
+
+            document.getElementById('historyTableBody').innerHTML = html;
+        }
+
+        function filterHistoryTable() {
+            renderHistoryTable();
+        }
+
+        // Export History Matched Data ke CSV
+        function exportHistoryToCSV() {
+            if (!matchedHistoryData.length) {
+                alert("Belum ada data untuk diekspor.");
+                return;
+            }
+
+            let csvRows = [
+                ["Order ID / Rekening", "User ID", "Tanggal Transaksi", "Nominal Admin (Rp)", "Nominal QRIS (Rp)", "Fee MDR (Rp)", "Status Audit"]
+            ];
+
+            matchedHistoryData.forEach(item => {
+                csvRows.push([
+                    `"${item.orderId}"`,
+                    `"${item.userId}"`,
+                    `"${item.date}"`,
+                    item.adminGross,
+                    item.qrisGross,
+                    item.qrisFee,
+                    item.status
+                ]);
+            });
+
+            let csvContent = "data:text/csv;charset=utf-8," + csvRows.map(e => e.join(",")).join("\n");
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Hasil_Audit_QRIS_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function resetAllData() {
@@ -426,6 +604,7 @@
                 localStorage.removeItem('audit_settle_data');
                 adminData = [];
                 settlementBatches = {};
+                matchedHistoryData = [];
                 location.reload();
             }
         }
