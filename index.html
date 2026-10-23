@@ -1,113 +1,308 @@
-<!DOCTYPE html>
-<html lang="id">
+    <!DOCTYPE html>
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Admin Absensi</title>
+  <title>Smart Excel Reader</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- SheetJS CDN (Parsing Excel Super Cepat) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #0f172a; color: #f8fafc; padding: 24px; min-height: 100vh; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .header h1 { font-size: 1.5rem; color: #38bdf8; letter-spacing: 0.5px; }
-    
-    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .card-stat { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); padding: 20px; border-radius: 12px; }
-    .card-stat p { font-size: 0.85rem; color: #94a3b8; }
-    .card-stat h2 { font-size: 2rem; margin-top: 8px; }
-    
-    .table-container { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 14px 16px; border-bottom: 1px solid #334155; }
-    th { background: #1e293b; color: #38bdf8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    tr:hover { background: rgba(255,255,255,0.02); }
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; background: #065f46; color: #34d399; }
+    /* Custom scrollbar untuk tabel */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
   </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
 
-<div class="header">
-  <h1>MONITORING ABSENSI REAL-TIME</h1>
-  <div id="sync-status" style="font-size: 0.85rem; color: #10b981; font-weight: 600;">● Live Syncing...</div>
-</div>
+  <!-- Header / Navbar Minimalis -->
+  <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+    <div class="flex items-center gap-3">
+      <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20 font-bold text-xl">
+        📊
+      </div>
+      <div>
+        <h1 class="font-bold text-base md:text-lg leading-tight">Excel Reader AI</h1>
+        <p class="text-xs text-slate-400">Pembaca File Excel & CSV Ringan</p>
+      </div>
+    </div>
 
-<div class="grid-stats">
-  <div class="card-stat"><p>Total Karyawan</p><h2 id="st-total">0</h2></div>
-  <div class="card-stat"><p>Hadir Hari Ini</p><h2 id="st-hadir" style="color:#34d399">0</h2></div>
-  <div class="card-stat"><p>Izin Keluar</p><h2 id="st-izin" style="color:#facc15">0</h2></div>
-  <div class="card-stat"><p>Sudah Pulang</p><h2 id="st-pulang" style="color:#60a5fa">0</h2></div>
-</div>
+    <!-- Tombol Input File Direct Native (Dioptimalkan untuk Tablet Android) -->
+    <div class="flex items-center gap-2">
+      <label for="excelFileInput" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs md:text-sm font-semibold px-4 py-2 rounded-xl cursor-pointer transition flex items-center gap-2 shadow-lg shadow-emerald-900/30">
+        <span>📂 Pilih File Excel</span>
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv, .ods" class="hidden" onchange="handleFileSelect(event)">
+      </label>
+    </div>
+  </header>
 
-<div class="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>ID Karyawan</th>
-        <th>Nama</th>
-        <th>Jam Masuk</th>
-        <th>Log Izin</th>
-        <th>Jam Pulang</th>
-      </tr>
-    </thead>
-    <tbody id="log-table">
-      <tr><td colspan="5" style="text-align:center; padding: 20px; color: #94a3b8;">Memuat data...</td></tr>
-    </tbody>
-  </table>
-</div>
+  <!-- Content Container -->
+  <main class="flex-1 p-3 md:p-6 flex flex-col max-w-7xl w-full mx-auto gap-4">
 
-<script>
-  // PASTE URL DEPLOYMENT APPS SCRIPT ANDA DI SINI
-  const URL = "https://script.google.com/macros/s/AKfycbyZd7J5SqvXa0SDy8Nirb1ENWGBApyagGuklEc_lQGm_kb2BiAdEGhMeEppv9PgHcJ8lA/exec";
+    <!-- Area Status & Info File -->
+    <div id="fileInfoArea" class="hidden bg-slate-800/80 border border-slate-700 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-3 bg-slate-700 rounded-xl text-emerald-400 text-xl font-bold">📄</div>
+        <div>
+          <h2 id="fileName" class="font-semibold text-sm md:text-base text-white truncate max-w-xs md:max-w-md">filename.xlsx</h2>
+          <p id="fileStats" class="text-xs text-slate-400">0 baris | 0 kolom</p>
+        </div>
+      </div>
 
-  function fetchDashboard() {
-    const statusEl = document.getElementById('sync-status');
-    
-    fetch(URL)
-    .then(res => res.json())
-    .then(data => {
-      if (data.error) {
-        statusEl.innerText = "⚠️ Error: " + data.error;
-        statusEl.style.color = "#f87171";
-        return;
-      }
+      <!-- Sheet Tabs Selector -->
+      <div id="sheetTabs" class="flex gap-2 overflow-x-auto py-1 scrollbar-none">
+        <!-- Tab sheets akan dirender di sini via JavaScript -->
+      </div>
+    </div>
 
-      statusEl.innerText = "● Live Syncing...";
-      statusEl.style.color = "#10b981";
+    <!-- Search & Filter Bar (Tampil Saat File Terload) -->
+    <div id="controlsArea" class="hidden flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+      <div class="relative w-full sm:w-72">
+        <input type="text" id="searchInput" oninput="filterData()" placeholder="Cari data di tabel..." 
+               class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-xs md:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+      </div>
+      <div class="text-xs text-slate-400 w-full sm:w-auto text-right" id="rowCountInfo">
+        Menampilkan 0 baris
+      </div>
+    </div>
 
-      document.getElementById('st-total').innerText = data.totalKaryawan || 0;
-      document.getElementById('st-hadir').innerText = data.hadir || 0;
-      document.getElementById('st-izin').innerText = data.izin || 0;
-      document.getElementById('st-pulang').innerText = data.pulang || 0;
+    <!-- State Kosong / Drop Area Initial -->
+    <div id="emptyState" class="flex-1 border-2 border-dashed border-slate-700 rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-slate-800/30 my-auto min-h-[300px]">
+      <div class="text-5xl mb-4">📑</div>
+      <h3 class="text-lg font-semibold text-slate-200 mb-1">Belum Ada File Dibuka</h3>
+      <p class="text-xs text-slate-400 max-w-sm mb-6">Klik tombol hijau di kanan atas atau tombol di bawah untuk memilih file Excel (.xlsx, .xls, .csv) dari tabletmu.</p>
+      
+      <label for="excelFileInputDrop" class="bg-slate-700 hover:bg-slate-600 active:scale-95 text-emerald-400 font-semibold text-sm px-5 py-2.5 rounded-xl cursor-pointer transition border border-slate-600">
+        Buka File dari Tablet
+        <input type="file" id="excelFileInputDrop" accept=".xlsx, .xls, .csv, .ods" class="hidden" onchange="handleFileSelect(event)">
+      </label>
+    </div>
 
-      let tbody = document.getElementById('log-table');
-      if (!data.logs || data.logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 20px;">Belum ada aktivitas absensi untuk hari ini</td></tr>`;
-        return;
-      }
+    <!-- Loading Spinner Indicator -->
+    <div id="loadingState" class="hidden flex-1 flex flex-col items-center justify-center p-8 min-h-[300px]">
+      <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+      <p class="text-xs text-emerald-400 font-medium">Membaca data Excel...</p>
+    </div>
 
-      let html = '';
-      data.logs.forEach(row => {
-        html += `
-          <tr>
-            <td><b>${row.id}</b></td>
-            <td>${row.nama}</td>
-            <td><span class="badge">${row.masuk}</span></td>
-            <td>${row.izin}</td>
-            <td>${row.pulang}</td>
-          </tr>
-        `;
+    <!-- Table Container -->
+    <div id="tableContainer" class="hidden flex-1 bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden flex flex-col shadow-xl">
+      <div class="overflow-x-auto overflow-y-auto max-h-[65vh] flex-1">
+        <table class="w-full text-left text-xs md:text-sm border-collapse">
+          <thead id="tableHead" class="bg-slate-900/90 text-slate-300 sticky top-0 z-10 font-semibold border-b border-slate-700">
+            <!-- Header tabel akan dirender di sini -->
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-700/50 text-slate-200">
+            <!-- Baris data akan dirender di sini -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let globalWorkbook = null;
+    let currentSheetData = [];
+    let filteredSheetData = [];
+
+    // Fungsi Utama Membaca File Excel
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Update UI ke state Loading
+      showLoading(true);
+
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          globalWorkbook = XLSX.read(data, { type: 'array', dense: true });
+
+          // Render Nama File & Info
+          document.getElementById('fileName').textContent = file.name;
+          
+          // Render Tab Sheet
+          renderSheetTabs(globalWorkbook.SheetNames);
+
+          // Buka Sheet Pertama secara Otomatis
+          switchSheet(globalWorkbook.SheetNames[0]);
+
+          // Sembunyikan Empty State & Tampilkan Konten
+          document.getElementById('emptyState').classList.add('hidden');
+          document.getElementById('fileInfoArea').classList.remove('hidden');
+          document.getElementById('controlsArea').classList.remove('hidden');
+          document.getElementById('tableContainer').classList.remove('hidden');
+
+        } catch (error) {
+          alert('Gagal membaca file. Pastikan format file adalah .xlsx, .xls, atau .csv yang valid.');
+          console.error(error);
+        } finally {
+          showLoading(false);
+        }
+      };
+
+      reader.onerror = function() {
+        alert('Terjadi kesalahan saat membaca file di memori tablet.');
+        showLoading(false);
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Render Tab Sheet jika File Memiliki Banyak Sheet
+    function renderSheetTabs(sheetNames) {
+      const tabsContainer = document.getElementById('sheetTabs');
+      tabsContainer.innerHTML = '';
+
+      sheetNames.forEach((name, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = name;
+        btn.className = `sheet-tab text-xs px-3 py-1.5 rounded-lg border font-medium whitespace-nowrap transition ${
+          index === 0 
+            ? 'bg-emerald-600 text-white border-emerald-500' 
+            : 'bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-700'
+        }`;
+        btn.onclick = () => {
+          document.querySelectorAll('.sheet-tab').forEach(t => {
+            t.className = 'sheet-tab text-xs px-3 py-1.5 rounded-lg border font-medium whitespace-nowrap transition bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-700';
+          });
+          btn.className = 'sheet-tab text-xs px-3 py-1.5 rounded-lg border font-medium whitespace-nowrap transition bg-emerald-600 text-white border-emerald-500';
+          switchSheet(name);
+        };
+        tabsContainer.appendChild(btn);
       });
-      tbody.innerHTML = html;
-    })
-    .catch(err => {
-      statusEl.innerText = "❌ Gagal Terhubung ke Script";
-      statusEl.style.color = "#f87171";
-    });
-  }
+    }
 
-  // Refresh otomatis setiap 5 detik
-  setInterval(fetchDashboard, 5000);
-  fetchDashboard();
-</script>
+    // Berpindah Antar Sheet
+    function switchSheet(sheetName) {
+      const sheet = globalWorkbook.Sheets[sheetName];
+      // Convert sheet data ke JSON Array (2D)
+      currentSheetData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+      filteredSheetData = [...currentSheetData];
 
+      document.getElementById('searchInput').value = '';
+      renderTable(filteredSheetData);
+    }
+
+    // Render Data ke Dalam Tabel HTML secara Cepat
+    function renderTable(data) {
+      const thead = document.getElementById('tableHead');
+      const tbody = document.getElementById('tableBody');
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td class="p-4 text-center text-slate-500 text-xs">Sheet ini kosong.</td></tr>`;
+        updateStats(0, 0);
+        return;
+      }
+
+      // Baris Pertama sebagai Header
+      const headerRow = data[0];
+      const trHead = document.createElement('tr');
+      
+      // Tambah kolom Nomor (Index)
+      const thIndex = document.createElement('th');
+      thIndex.className = 'p-3 text-slate-400 font-normal text-center w-12 border-b border-slate-700';
+      thIndex.textContent = '#';
+      trHead.appendChild(thIndex);
+
+      headerRow.forEach((col) => {
+        const th = document.createElement('th');
+        th.className = 'p-3 whitespace-nowrap font-semibold border-b border-slate-700';
+        th.textContent = col !== undefined && col !== "" ? col : "Kolom Tanpa Nama";
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+
+      // Render Baris Body (Optimized Document Fragment)
+      const fragment = document.createDocumentFragment();
+      const rowsToRender = data.slice(1);
+
+      rowsToRender.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-700/40 transition border-b border-slate-700/30';
+
+        // Index Nomor
+        const tdIndex = document.createElement('td');
+        tdIndex.className = 'p-3 text-slate-500 text-center text-xs font-mono';
+        tdIndex.textContent = rowIndex + 1;
+        tr.appendChild(tdIndex);
+
+        headerRow.forEach((_, colIndex) => {
+          const td = document.createElement('td');
+          td.className = 'p-3 whitespace-nowrap text-slate-300';
+          const val = row[colIndex];
+          td.textContent = val !== undefined ? val : "";
+          tr.appendChild(td);
+        });
+
+        fragment.appendChild(tr);
+      });
+
+      tbody.appendChild(fragment);
+      updateStats(rowsToRender.length, headerRow.length);
+    }
+
+    // Fitur Filter / Pencarian Instan
+    function filterData() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (!query) {
+        filteredSheetData = [...currentSheetData];
+      } else {
+        const header = currentSheetData[0];
+        const rows = currentSheetData.slice(1);
+        
+        const matchedRows = rows.filter(row => {
+          return row.some(cell => String(cell).toLowerCase().includes(query));
+        });
+
+        filteredSheetData = [header, ...matchedRows];
+      }
+      renderTable(filteredSheetData);
+    }
+
+    // Helper Status & Loading
+    function updateStats(totalRows, totalCols) {
+      document.getElementById('fileStats').textContent = `${totalRows} baris data | ${totalCols} kolom`;
+      document.getElementById('rowCountInfo').textContent = `Menampilkan ${totalRows} baris`;
+    }
+
+    function showLoading(isLoading) {
+      const loadingState = document.getElementById('loadingState');
+      const emptyState = document.getElementById('emptyState');
+      if (isLoading) {
+        loadingState.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+      } else {
+        loadingState.classList.add('hidden');
+      }
+    }
+  </script>
 </body>
 </html>
