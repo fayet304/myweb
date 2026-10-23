@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRIS Reconciliation & Data Analyzer Studio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (xlsx) untuk parsing Excel & CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Chart.js untuk Grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Navigation Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500 text-slate-950 p-2.5 rounded-xl font-bold text-xl shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white tracking-wide">QRIS & Data Reconciliation Studio</h1>
+                    <p class="text-xs text-slate-400">Analisis Universal & Pencocokan Settlement Otomatis</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <div class="flex items-center space-x-2">
+                <button onclick="switchTab('single')" id="tabSingleBtn" class="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 transition shadow">
+                    <i class="fa-solid fa-file-excel mr-1.5"></i> Analisis File Tunggal
+                </button>
+                <button onclick="switchTab('reconcile')" id="tabReconcileBtn" class="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-people-arrows mr-1.5"></i> Rekonsiliasi (2 File)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <!-- ==================== MENU 1: SINGLE FILE ANALYZER ==================== -->
+        <section id="viewSingle" class="space-y-6">
+            <div class="bg-slate-900/90 border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-2xl p-8 text-center cursor-pointer transition relative group shadow-xl" id="dropzoneSingle">
+                <input type="file" id="fileInputSingle" accept=".xlsx, .xls, .csv, .txt" class="hidden" onchange="handleSingleFileSelect(event)">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                    <div class="w-14 h-14 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300 border border-emerald-500/20">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <p class="text-base font-semibold text-slate-200">Upload File untuk Dianalisa (Excel / CSV / Settlement)</p>
+                        <p class="text-xs text-slate-400 mt-1">Sistem otomatis mendeteksi header & struktur data apapun secara instan</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Single -->
+            <div id="loadingSingle" class="hidden flex flex-col items-center justify-center py-12 space-y-3">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                <p class="text-slate-400 text-xs">Memproses dan menganalisa data...</p>
+            </div>
+
+            <!-- Dashboard Result Single -->
+            <div id="dashboardSingle" class="hidden space-y-6">
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <div class="text-xs text-slate-300">File: <span class="font-bold text-white" id="metaSingleName">-</span></div>
+                    <button onclick="resetSingle()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700">Ganti File</button>
+                </div>
+
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="statCardsSingle"></div>
+
+                <!-- Chart & Insights -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 flex flex-col">
+                        <h3 class="font-bold text-slate-200 text-xs border-b border-slate-800 pb-3 mb-3"><i class="fa-solid fa-brain text-emerald-400 mr-2"></i> Ringkasan Otomatis</h3>
+                        <div id="insightsSingle" class="space-y-2.5 text-xs text-slate-300 overflow-y-auto max-h-[260px]"></div>
+                    </div>
+                    <div class="lg:col-span-2 bg-slate-900 p-5 rounded-xl border border-slate-800 flex flex-col">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
+                            <h3 class="font-bold text-slate-200 text-xs"><i class="fa-solid fa-chart-column text-emerald-400 mr-2"></i> Grafik Visualisasi</h3>
+                            <select id="chartColSingle" onchange="renderChartSingle()" class="bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded px-2 py-1 outline-none"></select>
+                        </div>
+                        <div class="relative w-full h-[250px]"><canvas id="chartCanvasSingle"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Table Preview -->
+                <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+                    <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-200 text-xs"><i class="fa-solid fa-table text-emerald-400 mr-2"></i> Pratinjau Baris Data</h3>
+                        <input type="text" id="searchSingle" onkeyup="filterTableSingle()" placeholder="Cari data..." class="bg-slate-950 text-xs text-slate-200 px-3 py-1.5 rounded border border-slate-800 outline-none">
+                    </div>
+                    <div class="overflow-x-auto max-h-[350px] custom-scrollbar">
+                        <table class="w-full text-left text-xs text-slate-300" id="tableSingle">
+                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0" id="theadSingle"></thead>
+                            <tbody id="tbodySingle" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MENU 2: RECONCILIATION (2 FILES) ==================== -->
+        <section id="viewReconcile" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Upload File 1: Admin -->
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center font-bold border border-blue-500/20">1</div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">File Dashboard Admin</h3>
+                            <p class="text-xs text-slate-400">Laporan transaksi internal (CSV/Excel)</p>
+                        </div>
+                    </div>
+                    <div class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer transition" onclick="document.getElementById('fileAdmin').click()">
+                        <input type="file" id="fileAdmin" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleAdminFile(event)">
+                        <p class="text-xs text-slate-300 font-semibold" id="labelAdmin">Klik untuk pilih file Admin</p>
+                    </div>
+                </div>
+
+                <!-- Upload File 2: QRIS Settlement -->
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center font-bold border border-indigo-500/20">2</div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">File Settlement QRIS</h3>
+                            <p class="text-xs text-slate-400">Laporan pencairan dari Payment Gateway</p>
+                        </div>
+                    </div>
+                    <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-6 text-center cursor-pointer transition" onclick="document.getElementById('fileQris').click()">
+                        <input type="file" id="fileQris" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleQrisFile(event)">
+                        <p class="text-xs text-slate-300 font-semibold" id="labelQris">Klik untuk pilih file Settlement QRIS</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Run Reconciliation Button -->
+            <div class="flex justify-center">
+                <button onclick="runReconciliation()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-xl text-xs transition shadow-lg flex items-center space-x-2">
+                    <i class="fa-solid fa-gears"></i>
+                    <span>Mulai Proses Pencocokan (Rekonsiliasi)</span>
+                </button>
+            </div>
+
+            <!-- Reconciliation Results -->
+            <div id="resultReconcile" class="hidden space-y-6">
+                <!-- Stat Summary Match -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                        <p class="text-xs text-slate-400 uppercase font-semibold">Transaksi Match (Sukses Cair)</p>
+                        <h3 class="text-2xl font-bold text-emerald-400 mt-1" id="recMatchCount">0</h3>
+                        <p class="text-xs text-slate-400 mt-1" id="recMatchVal">Rp 0</p>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                        <p class="text-xs text-slate-400 uppercase font-semibold">Belum Cair / Unmatched</p>
+                        <h3 class="text-2xl font-bold text-amber-400 mt-1" id="recUnmatchCount">0</h3>
+                        <p class="text-xs text-slate-400 mt-1" id="recUnmatchVal">Rp 0</p>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                        <p class="text-xs text-slate-400 uppercase font-semibold">Total Selisih Akumulasi</p>
+                        <h3 class="text-2xl font-bold text-blue-400 mt-1" id="recFeeTotal">Rp 0</h3>
+                        <p class="text-xs text-slate-400 mt-1">Total Fee / Potongan</p>
+                    </div>
+                </div>
+
+                <!-- Detailed Table Match -->
+                <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+                    <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-200 text-xs"><i class="fa-solid fa-list-check text-emerald-400 mr-2"></i> Hasil Rekonsiliasi ID Transaksi</h3>
+                        <input type="text" id="searchRec" onkeyup="filterTableRec()" placeholder="Cari ID transaksi..." class="bg-slate-950 text-xs text-slate-200 px-3 py-1.5 rounded border border-slate-800 outline-none">
+                    </div>
+                    <div class="overflow-x-auto max-h-[400px] custom-scrollbar">
+                        <table class="w-full text-left text-xs text-slate-300" id="tableRec">
+                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-3">ID / Reference</th>
+                                    <th class="px-4 py-3">Sumber Admin</th>
+                                    <th class="px-4 py-3">Nominal Admin</th>
+                                    <th class="px-4 py-3">Status QRIS Settlement</th>
+                                    <th class="px-4 py-3">Fee QRIS</th>
+                                    <th class="px-4 py-3">Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyRec" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            &copy; 2026 QRIS & Data Reconciliation Studio. Siap Deploy ke GitHub Pages.
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let singleData = [], singleHeaders = [], chartSingleInstance = null;
+        let adminRawData = [], qrisRawData = [], reconciledData = [];
+
+        function switchTab(tab) {
+            if (tab === 'single') {
+                document.getElementById('viewSingle').classList.remove('hidden');
+                document.getElementById('viewReconcile').classList.add('hidden');
+                document.getElementById('tabSingleBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 transition shadow";
+                document.getElementById('tabReconcileBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            } else {
+                document.getElementById('viewSingle').classList.add('hidden');
+                document.getElementById('viewReconcile').classList.remove('hidden');
+                document.getElementById('tabReconcileBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 transition shadow";
+                document.getElementById('tabSingleBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            }
+        }
+
+        // ==================== SINGLE ANALYZER LOGIC ====================
+        function handleSingleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('loadingSingle').classList.remove('hidden');
+            document.getElementById('dropzoneSingle').classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+                    let headerIdx = 0;
+                    for (let i = 0; i < Math.min(10, rawRows.length); i++) {
+                        if (rawRows[i].filter(c => c !== "").length >= 2) { headerIdx = i; break; }
+                    }
+
+                    singleHeaders = rawRows[headerIdx].map((h, i) => h ? String(h).trim() : `Kolom_${i+1}`);
+                    singleData = [];
+                    for (let i = headerIdx + 1; i < rawRows.length; i++) {
+                        if (!rawRows[i] || rawRows[i].every(c => c === "")) continue;
+                        let rowObj = {};
+                        singleHeaders.forEach((h, idx) => { rowObj[h] = rawRows[i][idx] !== undefined ? rawRows[i][idx] : ""; });
+                        singleData.push(rowObj);
+                    }
+
+                    document.getElementById('metaSingleName').innerText = file.name;
+                    document.getElementById('loadingSingle').classList.add('hidden');
+                    document.getElementById('dashboardSingle').classList.remove('hidden');
+                    renderSingleDashboard();
+                } catch (err) {
+                    alert("Gagal membaca file.");
+                    resetSingle();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderSingleDashboard() {
+            let numericCols = [];
+            let stats = {};
+
+            singleHeaders.forEach(h => {
+                let isNum = true, sum = 0, count = 0;
+                singleData.forEach(r => {
+                    let v = r[h];
+                    if (v !== "" && v !== null) {
+                        let num = Number(String(v).replace(/[^0-9.-]+/g,""));
+                        if (isNaN(num)) isNum = false; else { sum += num; count++; }
+                    }
+                });
+                if (isNum && count > 0) { numericCols.push(h); stats[h] = { sum, avg: sum/count }; }
+            });
+
+            // Stat Cards
+            let cardsHtml = `
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Baris</p><h4 class="text-xl font-bold text-white mt-1">${singleData.length.toLocaleString('id-ID')}</h4></div>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Kolom</p><h4 class="text-xl font-bold text-white mt-1">${singleHeaders.length}</h4></div>
+            `;
+            if (numericCols.length > 0) {
+                cardsHtml += `<div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Akumulasi (${numericCols[0]})</p><h4 class="text-xl font-bold text-emerald-400 mt-1">${stats[numericCols[0]].sum.toLocaleString('id-ID')}</h4></div>`;
+                if (numericCols.length > 1) {
+                    cardsHtml += `<div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Akumulasi (${numericCols[1]})</p><h4 class="text-xl font-bold text-indigo-400 mt-1">${stats[numericCols[1]].sum.toLocaleString('id-ID')}</h4></div>`;
+                }
+            }
+            document.getElementById('statCardsSingle').innerHTML = cardsHtml;
+
+            // Insights
+            let ins = [`Berhasil memuat ${singleData.length} baris dan ${singleHeaders.length} kolom.`];
+            if (numericCols.length > 0) ins.push(`Kolom <b>"${numericCols[0]}"</b> memiliki total sebesar <b>${stats[numericCols[0]].sum.toLocaleString('id-ID')}</b>.`);
+            document.getElementById('insightsSingle').innerHTML = ins.map(i => `<div class="p-2 bg-slate-950 rounded border border-slate-800 flex items-start space-x-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i><span>${i}</span></div>`).join('');
+
+            // Chart Dropdown
+            let select = document.getElementById('chartColSingle');
+            select.innerHTML = '';
+            (numericCols.length > 0 ? numericCols : singleHeaders).forEach(h => { select.innerHTML += `<option value="${h}">${h}</option>`; });
+            renderChartSingle();
+
+            // Table
+            let thead = document.getElementById('theadSingle');
+            let tbody = document.getElementById('tbodySingle');
+            thead.innerHTML = `<tr>${singleHeaders.map(h => `<th class="px-4 py-2.5">${h}</th>`).join('')}</tr>`;
+            tbody.innerHTML = singleData.slice(0, 100).map(r => `<tr>${singleHeaders.map(h => `<td class="px-4 py-2 border-b border-slate-800">${r[h]}</td>`).join('')}</tr>`).join('');
+        }
+
+        function renderChartSingle() {
+            let col = document.getElementById('chartColSingle').value;
+            if (!col) return;
+            let slice = singleData.slice(0, 15);
+            let labels = slice.map((_, i) => `Baris ${i+1}`);
+            let values = slice.map(r => Number(String(r[col]).replace(/[^0-9.-]+/g,"")) || 0);
+
+            let ctx = document.getElementById('chartCanvasSingle').getContext('2d');
+            if (chartSingleInstance) chartSingleInstance.destroy();
+            chartSingleInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: col, data: values, backgroundColor: '#10b981', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }, y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } } } }
+            });
+        }
+
+        function filterTableSingle() {
+            let q = document.getElementById('searchSingle').value.toLowerCase();
+            document.querySelectorAll('#tbodySingle tr').forEach(tr => { tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+        }
+
+        function resetSingle() {
+            singleData = []; singleHeaders = [];
+            document.getElementById('fileInputSingle').value = '';
+            document.getElementById('dashboardSingle').classList.add('hidden');
+            document.getElementById('dropzoneSingle').classList.remove('hidden');
+        }
+
+        // ==================== RECONCILIATION LOGIC ====================
+        function handleAdminFile(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('labelAdmin').innerText = file.name;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                let wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+                adminRawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function handleQrisFile(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('labelQris').innerText = file.name;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                let wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+                let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
+                qrisRawData = [];
+                if (raw.length > 1) {
+                    let head = raw[0];
+                    for (let i = 1; i < raw.length; i++) {
+                        let obj = {};
+                        head.forEach((h, idx) => { obj[h || `Col_${idx}`] = raw[i][idx] !== undefined ? raw[i][idx] : ""; });
+                        qrisRawData.push(obj);
+                    }
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function runReconciliation() {
+            if (adminRawData.length === 0 || qrisRawData.length === 0) {
+                alert("Harap upload kedua file (Admin dan Settlement QRIS) terlebih dahulu!");
+                return;
+            }
+
+            // Index QRIS by Partner ID / Ticket
+            let qrisMap = {};
+            qrisRawData.forEach(q => {
+                let key = String(q['PARTNER ID'] || q['TICKET'] || '').trim();
+                if (key) qrisMap[key] = q;
+            });
+
+            let matchCount = 0, unmatchCount = 0, matchVal = 0, unmatchVal = 0, totalFee = 0;
+            reconciledData = [];
+
+            adminRawData.forEach(adm => {
+                // Cari kolom ID / Rekening di admin
+                let admId = String(adm['Dari Rekening Bank'] || adm['ORDER ID'] || adm['ID'] || '').trim();
+                let admAmount = Number(String(adm['Jumlah'] || adm['RECORD VALUE'] || '0').replace(/[^0-9.-]+/g,"")) || 0;
+
+                let foundQris = qrisMap[admId];
+                if (foundQris) {
+                    matchCount++;
+                    matchVal += admAmount;
+                    let fee = Number(String(foundQris['RECORD FEE'] || '0').replace(/[^0-9.-]+/g,"")) || 0;
+                    totalFee += fee;
+                    reconciledData.push({ id: admId, source: 'Admin', val: admAmount, status: 'MATCH (SUKSES)', fee: fee, note: 'Cair di QRIS' });
+                } else {
+                    unmatchCount++;
+                    unmatchVal += admAmount;
+                    reconciledData.push({ id: admId || 'Unknown', source: 'Admin', val: admAmount, status: 'BELUM CAIR / PENDING', fee: 0, note: 'Tidak ditemukan di Settlement' });
+                }
+            });
+
+            // Update UI
+            document.getElementById('recMatchCount').innerText = matchCount.toLocaleString('id-ID');
+            document.getElementById('recMatchVal').innerText = 'Rp ' + matchVal.toLocaleString('id-ID');
+            document.getElementById('recUnmatchCount').innerText = unmatchCount.toLocaleString('id-ID');
+            document.getElementById('recUnmatchVal').innerText = 'Rp ' + unmatchVal.toLocaleString('id-ID');
+            document.getElementById('recFeeTotal').innerText = 'Rp ' + totalFee.toLocaleString('id-ID');
+
+            let tbody = document.getElementById('tbodyRec');
+            tbody.innerHTML = reconciledData.slice(0, 150).map(r => `
+                <tr>
+                    <td class="px-4 py-2.5 border-b border-slate-800 font-mono text-xs">${r.id}</td>
+                    <td class="px-4 py-2.5 border-b border-slate-800">${r.source}</td>
+                    <td class="px-4 py-2.5 border-b border-slate-800">Rp ${r.val.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-2.5 border-b border-slate-800"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.status.includes('MATCH') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${r.status}</span></td>
+                    <td class="px-4 py-2.5 border-b border-slate-800">Rp ${r.fee.toLocaleString('id-ID')}</td>
+                    <td class="px-4 py-2.5 border-b border-slate-800 text-slate-400">${r.note}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('resultReconcile').classList.remove('hidden');
+        }
+
+        function filterTableRec() {
+            let q = document.getElementById('searchRec').value.toLowerCase();
+            document.querySelectorAll('#tbodyRec tr').forEach(tr => { tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+        }
+    </script>
+</body>
+</html>
