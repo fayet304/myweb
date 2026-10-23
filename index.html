@@ -226,6 +226,33 @@
             }
         }
 
+        // Smart parser to handle tab characters and header row shifts
+        function parseSheetSmart(worksheet) {
+            const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+            if (!rawRows || rawRows.length === 0) return { headers: [], data: [] };
+
+            let headerIdx = 0;
+            for (let i = 0; i < Math.min(10, rawRows.length); i++) {
+                let filled = rawRows[i].filter(c => c !== "" && c !== null);
+                if (filled.length >= 2) { headerIdx = i; break; }
+            }
+
+            let headers = rawRows[headerIdx].map((h, i) => h ? String(h).trim() : `Kolom_${i+1}`);
+            let data = [];
+            for (let i = headerIdx + 1; i < rawRows.length; i++) {
+                let row = rawRows[i];
+                if (!row || row.every(c => c === "" || c === null)) continue;
+                let rowObj = {};
+                headers.forEach((h, idx) => {
+                    let val = row[idx] !== undefined ? row[idx] : "";
+                    if (typeof val === 'string') val = val.replace(/\t/g, '').trim();
+                    rowObj[h] = val;
+                });
+                data.push(rowObj);
+            }
+            return { headers, data };
+        }
+
         // ==================== SINGLE ANALYZER LOGIC ====================
         function handleSingleFileSelect(e) {
             const file = e.target.files[0];
@@ -238,21 +265,10 @@
                 try {
                     const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+                    const parsed = parseSheetSmart(worksheet);
 
-                    let headerIdx = 0;
-                    for (let i = 0; i < Math.min(10, rawRows.length); i++) {
-                        if (rawRows[i].filter(c => c !== "").length >= 2) { headerIdx = i; break; }
-                    }
-
-                    singleHeaders = rawRows[headerIdx].map((h, i) => h ? String(h).trim() : `Kolom_${i+1}`);
-                    singleData = [];
-                    for (let i = headerIdx + 1; i < rawRows.length; i++) {
-                        if (!rawRows[i] || rawRows[i].every(c => c === "")) continue;
-                        let rowObj = {};
-                        singleHeaders.forEach((h, idx) => { rowObj[h] = rawRows[i][idx] !== undefined ? rawRows[i][idx] : ""; });
-                        singleData.push(rowObj);
-                    }
+                    singleHeaders = parsed.headers;
+                    singleData = parsed.data;
 
                     document.getElementById('metaSingleName').innerText = file.name;
                     document.getElementById('loadingSingle').classList.add('hidden');
@@ -282,7 +298,6 @@
                 if (isNum && count > 0) { numericCols.push(h); stats[h] = { sum, avg: sum/count }; }
             });
 
-            // Stat Cards
             let cardsHtml = `
                 <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Baris</p><h4 class="text-xl font-bold text-white mt-1">${singleData.length.toLocaleString('id-ID')}</h4></div>
                 <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Kolom</p><h4 class="text-xl font-bold text-white mt-1">${singleHeaders.length}</h4></div>
@@ -295,18 +310,15 @@
             }
             document.getElementById('statCardsSingle').innerHTML = cardsHtml;
 
-            // Insights
             let ins = [`Berhasil memuat ${singleData.length} baris dan ${singleHeaders.length} kolom.`];
             if (numericCols.length > 0) ins.push(`Kolom <b>"${numericCols[0]}"</b> memiliki total sebesar <b>${stats[numericCols[0]].sum.toLocaleString('id-ID')}</b>.`);
             document.getElementById('insightsSingle').innerHTML = ins.map(i => `<div class="p-2 bg-slate-950 rounded border border-slate-800 flex items-start space-x-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i><span>${i}</span></div>`).join('');
 
-            // Chart Dropdown
             let select = document.getElementById('chartColSingle');
             select.innerHTML = '';
             (numericCols.length > 0 ? numericCols : singleHeaders).forEach(h => { select.innerHTML += `<option value="${h}">${h}</option>`; });
             renderChartSingle();
 
-            // Table
             let thead = document.getElementById('theadSingle');
             let tbody = document.getElementById('tbodySingle');
             thead.innerHTML = `<tr>${singleHeaders.map(h => `<th class="px-4 py-2.5">${h}</th>`).join('')}</tr>`;
@@ -349,7 +361,7 @@
             let reader = new FileReader();
             reader.onload = function(evt) {
                 let wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                adminRawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+                adminRawData = parseSheetSmart(wb.Sheets[wb.SheetNames[0]]).data;
             };
             reader.readAsArrayBuffer(file);
         }
@@ -361,16 +373,7 @@
             let reader = new FileReader();
             reader.onload = function(evt) {
                 let wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
-                qrisRawData = [];
-                if (raw.length > 1) {
-                    let head = raw[0];
-                    for (let i = 1; i < raw.length; i++) {
-                        let obj = {};
-                        head.forEach((h, idx) => { obj[h || `Col_${idx}`] = raw[i][idx] !== undefined ? raw[i][idx] : ""; });
-                        qrisRawData.push(obj);
-                    }
-                }
+                qrisRawData = parseSheetSmart(wb.Sheets[wb.SheetNames[0]]).data;
             };
             reader.readAsArrayBuffer(file);
         }
@@ -381,10 +384,9 @@
                 return;
             }
 
-            // Index QRIS by Partner ID / Ticket
             let qrisMap = {};
             qrisRawData.forEach(q => {
-                let key = String(q['PARTNER ID'] || q['TICKET'] || '').trim();
+                let key = String(q['PARTNER ID'] || q['TICKET'] || q['ID'] || '').trim();
                 if (key) qrisMap[key] = q;
             });
 
@@ -392,9 +394,8 @@
             reconciledData = [];
 
             adminRawData.forEach(adm => {
-                // Cari kolom ID / Rekening di admin
-                let admId = String(adm['Dari Rekening Bank'] || adm['ORDER ID'] || adm['ID'] || '').trim();
-                let admAmount = Number(String(adm['Jumlah'] || adm['RECORD VALUE'] || '0').replace(/[^0-9.-]+/g,"")) || 0;
+                let admId = String(adm['Dari Rekening Bank'] || adm['ORDER ID'] || adm['ID'] || adm['Ticket'] || '').trim();
+                let admAmount = Number(String(adm['Jumlah'] || adm['RECORD VALUE'] || adm['Value'] || '0').replace(/[^0-9.-]+/g,"")) || 0;
 
                 let foundQris = qrisMap[admId];
                 if (foundQris) {
@@ -410,7 +411,6 @@
                 }
             });
 
-            // Update UI
             document.getElementById('recMatchCount').innerText = matchCount.toLocaleString('id-ID');
             document.getElementById('recMatchVal').innerText = 'Rp ' + matchVal.toLocaleString('id-ID');
             document.getElementById('recUnmatchCount').innerText = unmatchCount.toLocaleString('id-ID');
