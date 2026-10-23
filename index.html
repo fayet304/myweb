@@ -1,308 +1,543 @@
-    <!DOCTYPE html>
-<html lang="id" class="dark">
+<!DOCTYPE html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Excel Reader</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f0fdf4',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel & CSV Data Analyzer Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (xlsx) for parsing Excel files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-      }
-    }
-  </script>
-  
-  <!-- SheetJS CDN (Parsing Excel Super Cepat) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  
-  <style>
-    /* Custom scrollbar untuk tabel */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-  </style>
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
 
-  <!-- Header / Navbar Minimalis -->
-  <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
-    <div class="flex items-center gap-3">
-      <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20 font-bold text-xl">
-        📊
-      </div>
-      <div>
-        <h1 class="font-bold text-base md:text-lg leading-tight">Excel Reader AI</h1>
-        <p class="text-xs text-slate-400">Pembaca File Excel & CSV Ringan</p>
-      </div>
-    </div>
-
-    <!-- Tombol Input File Direct Native (Dioptimalkan untuk Tablet Android) -->
-    <div class="flex items-center gap-2">
-      <label for="excelFileInput" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs md:text-sm font-semibold px-4 py-2 rounded-xl cursor-pointer transition flex items-center gap-2 shadow-lg shadow-emerald-900/30">
-        <span>📂 Pilih File Excel</span>
-        <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv, .ods" class="hidden" onchange="handleFileSelect(event)">
-      </label>
-    </div>
-  </header>
-
-  <!-- Content Container -->
-  <main class="flex-1 p-3 md:p-6 flex flex-col max-w-7xl w-full mx-auto gap-4">
-
-    <!-- Area Status & Info File -->
-    <div id="fileInfoArea" class="hidden bg-slate-800/80 border border-slate-700 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="p-3 bg-slate-700 rounded-xl text-emerald-400 text-xl font-bold">📄</div>
-        <div>
-          <h2 id="fileName" class="font-semibold text-sm md:text-base text-white truncate max-w-xs md:max-w-md">filename.xlsx</h2>
-          <p id="fileStats" class="text-xs text-slate-400">0 baris | 0 kolom</p>
+    <!-- Header Navigation -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500 text-slate-900 p-2 rounded-lg font-bold text-xl">
+                    <i class="fa-solid fa-file-excel"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-wide">Excel Analytics Studio</h1>
+                    <p class="text-xs text-slate-400">Analisa & Ringkasan Data Spreadsheet Otomatis</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="resetApp()" id="btnReset" class="hidden text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg transition border border-slate-600">
+                    <i class="fa-solid fa-arrow-rotate-left mr-1">="mr-1"></i> Reset Data
+                </button>
+            </div>
         </div>
-      </div>
+    </header>
 
-      <!-- Sheet Tabs Selector -->
-      <div id="sheetTabs" class="flex gap-2 overflow-x-auto py-1 scrollbar-none">
-        <!-- Tab sheets akan dirender di sini via JavaScript -->
-      </div>
-    </div>
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-    <!-- Search & Filter Bar (Tampil Saat File Terload) -->
-    <div id="controlsArea" class="hidden flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
-      <div class="relative w-full sm:w-72">
-        <input type="text" id="searchInput" oninput="filterData()" placeholder="Cari data di tabel..." 
-               class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-xs md:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
-      </div>
-      <div class="text-xs text-slate-400 w-full sm:w-auto text-right" id="rowCountInfo">
-        Menampilkan 0 baris
-      </div>
-    </div>
+        <!-- Upload Dropzone Area -->
+        <section id="uploadSection" class="transition-all duration-300">
+            <div class="bg-slate-800 border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-2xl p-8 text-center cursor-pointer transition relative group" id="dropzone">
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileSelect(event)">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-3xl group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-slate-200">Klik atau Tarik File Excel / CSV Ke Sini</p>
+                        <p class="text-sm text-slate-400 mt-1">Mendukung format .xlsx, .xls, dan .csv</p>
+                    </div>
+                    <div class="inline-flex items-center space-x-2 bg-slate-700/50 px-4 py-1.5 rounded-full text-xs text-slate-300 border border-slate-600">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        <span>Privasi Aman: Data diproses lokal di browser tanpa diunggah ke server.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <!-- State Kosong / Drop Area Initial -->
-    <div id="emptyState" class="flex-1 border-2 border-dashed border-slate-700 rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-slate-800/30 my-auto min-h-[300px]">
-      <div class="text-5xl mb-4">📑</div>
-      <h3 class="text-lg font-semibold text-slate-200 mb-1">Belum Ada File Dibuka</h3>
-      <p class="text-xs text-slate-400 max-w-sm mb-6">Klik tombol hijau di kanan atas atau tombol di bawah untuk memilih file Excel (.xlsx, .xls, .csv) dari tabletmu.</p>
-      
-      <label for="excelFileInputDrop" class="bg-slate-700 hover:bg-slate-600 active:scale-95 text-emerald-400 font-semibold text-sm px-5 py-2.5 rounded-xl cursor-pointer transition border border-slate-600">
-        Buka File dari Tablet
-        <input type="file" id="excelFileInputDrop" accept=".xlsx, .xls, .csv, .ods" class="hidden" onchange="handleFileSelect(event)">
-      </label>
-    </div>
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="hidden flex flex-col items-center justify-center py-12 space-y-3">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400"></div>
+            <p class="text-slate-300 text-sm">Menganalisa dan mengolah data...</p>
+        </div>
 
-    <!-- Loading Spinner Indicator -->
-    <div id="loadingState" class="hidden flex-1 flex flex-col items-center justify-center p-8 min-h-[300px]">
-      <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-      <p class="text-xs text-emerald-400 font-medium">Membaca data Excel...</p>
-    </div>
+        <!-- Dashboard Content (Hidden by Default) -->
+        <div id="dashboardContent" class="hidden space-y-6">
 
-    <!-- Table Container -->
-    <div id="tableContainer" class="hidden flex-1 bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden flex flex-col shadow-xl">
-      <div class="overflow-x-auto overflow-y-auto max-h-[65vh] flex-1">
-        <table class="w-full text-left text-xs md:text-sm border-collapse">
-          <thead id="tableHead" class="bg-slate-900/90 text-slate-300 sticky top-0 z-10 font-semibold border-b border-slate-700">
-            <!-- Header tabel akan dirender di sini -->
-          </thead>
-          <tbody id="tableBody" class="divide-y divide-slate-700/50 text-slate-200">
-            <!-- Baris data akan dirender di sini -->
-          </tbody>
-        </table>
-      </div>
-    </div>
+            <!-- Controls Header: Sheet Selector & Metadata -->
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm font-medium text-slate-400">Sheet Terpilih:</span>
+                    <select id="sheetSelect" onchange="changeSheet()" class="bg-slate-900 border border-slate-700 text-emerald-400 font-medium text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4 text-xs text-slate-400">
+                    <div><span class="font-semibold text-slate-200" id="fileMetaName">-</span></div>
+                    <div>•</div>
+                    <div>Total Sheet: <span class="font-semibold text-slate-200" id="fileMetaSheets">0</span></div>
+                </div>
+            </div>
 
-  </main>
+            <!-- Metric Stat Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Baris</p>
+                            <h3 class="text-2xl font-bold text-white mt-1" id="statRows">0</h3>
+                        </div>
+                        <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg text-lg">
+                            <i class="fa-solid fa-list-ol"></i>
+                        </div>
+                    </div>
+                </div>
 
-  <script>
-    let globalWorkbook = null;
-    let currentSheetData = [];
-    let filteredSheetData = [];
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Kolom</p>
+                            <h3 class="text-2xl font-bold text-white mt-1" id="statCols">0</h3>
+                        </div>
+                        <div class="p-2.5 bg-purple-500/10 text-purple-400 rounded-lg text-lg">
+                            <i class="fa-solid fa-table-columns"></i>
+                        </div>
+                    </div>
+                </div>
 
-    // Fungsi Utama Membaca File Excel
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Kolom Angka</p>
+                            <h3 class="text-2xl font-bold text-white mt-1" id="statNumCols">0</h3>
+                        </div>
+                        <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-lg">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                    </div>
+                </div>
 
-      // Update UI ke state Loading
-      showLoading(true);
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Nilai Kosong (Null)</p>
+                            <h3 class="text-2xl font-bold text-white mt-1" id="statNulls">0</h3>
+                        </div>
+                        <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-lg text-lg">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-      const reader = new FileReader();
+            <!-- Insights & Auto Chart Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Auto Generated Insights -->
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col">
+                    <div class="flex items-center space-x-2 border-b border-slate-700 pb-3 mb-4">
+                        <i class="fa-solid fa-brain text-emerald-400"></i>
+                        <h2 class="font-bold text-slate-100">Ringkasan Otomatis</h2>
+                    </div>
+                    <div id="insightsList" class="space-y-3 text-sm text-slate-300 custom-scrollbar overflow-y-auto max-h-[320px] flex-1">
+                        <!-- Insights inserted here dynamically -->
+                    </div>
+                </div>
 
-      reader.onload = function(e) {
-        try {
-          const data = new Uint8Array(e.target.result);
-          globalWorkbook = XLSX.read(data, { type: 'array', dense: true });
+                <!-- Interactive Chart Visualization -->
+                <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 pb-3 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-chart-column text-emerald-400"></i>
+                            <h2 class="font-bold text-slate-100">Visualisasi Data</h2>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs">
+                            <select id="chartColumnSelect" onchange="updateChart()" class="bg-slate-900 border border-slate-700 text-slate-200 rounded px-2 py-1 outline-none">
+                            </select>
+                            <select id="chartTypeSelect" onchange="updateChart()" class="bg-slate-900 border border-slate-700 text-slate-200 rounded px-2 py-1 outline-none">
+                                <option value="bar">Bar Chart</option>
+                                <option value="line">Line Chart</option>
+                                <option value="pie">Pie Chart</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-[300px] flex items-center justify-center">
+                        <canvas id="dataChart"></canvas>
+                    </div>
+                </div>
+            </div>
 
-          // Render Nama File & Info
-          document.getElementById('fileName').textContent = file.name;
-          
-          // Render Tab Sheet
-          renderSheetTabs(globalWorkbook.SheetNames);
+            <!-- Data Table Section -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-sm">
+                <div class="p-4 border-b border-slate-700 flex flex-wrap justify-between items-center gap-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-table text-emerald-400"></i>
+                        <h2 class="font-bold text-slate-100">Pratinjau Data</h2>
+                    </div>
+                    <div class="relative max-w-xs w-full">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari dalam tabel..." class="w-full bg-slate-900 text-xs text-slate-200 pl-8 pr-3 py-2 rounded-lg border border-slate-700 outline-none focus:border-emerald-500">
+                    </div>
+                </div>
 
-          // Buka Sheet Pertama secara Otomatis
-          switchSheet(globalWorkbook.SheetNames[0]);
+                <div class="overflow-x-auto custom-scrollbar max-h-[400px]">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="text-xs uppercase bg-slate-900/80 text-slate-400 sticky top-0 backdrop-blur-md z-10" id="tableHead">
+                            <!-- Column Headers Dynamic -->
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-700/50">
+                            <!-- Table Rows Dynamic -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="p-3 bg-slate-900/50 border-t border-slate-700 text-xs text-slate-400 flex justify-between items-center">
+                    <span id="recordCountInfo">Menampilkan 0 baris</span>
+                    <span>* Menampilkan maksimal 100 baris pertama untuk performa.</span>
+                </div>
+            </div>
 
-          // Sembunyikan Empty State & Tampilkan Konten
-          document.getElementById('emptyState').classList.add('hidden');
-          document.getElementById('fileInfoArea').classList.remove('hidden');
-          document.getElementById('controlsArea').classList.remove('hidden');
-          document.getElementById('tableContainer').classList.remove('hidden');
+        </div>
+    </main>
 
-        } catch (error) {
-          alert('Gagal membaca file. Pastikan format file adalah .xlsx, .xls, atau .csv yang valid.');
-          console.error(error);
-        } finally {
-          showLoading(false);
+    <!-- Footer -->
+    <footer class="bg-slate-800 border-t border-slate-700 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+            &copy; 2026 Excel Data Analyzer Studio. Built with SheetJS & Chart.js.
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let currentWorkbook = null;
+        let currentSheetData = [];
+        let myChartInstance = null;
+
+        // Setup Drag & Drop
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('border-emerald-500', 'bg-slate-800/80');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('border-emerald-500', 'bg-slate-800/80');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('border-emerald-500', 'bg-slate-800/80');
+            if (e.dataTransfer.files.length) {
+                processFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        function handleFileSelect(e) {
+            if (e.target.files.length) {
+                processFile(e.target.files[0]);
+            }
         }
-      };
 
-      reader.onerror = function() {
-        alert('Terjadi kesalahan saat membaca file di memori tablet.');
-        showLoading(false);
-      };
+        function processFile(file) {
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('uploadSection').classList.add('hidden');
 
-      reader.readAsArrayBuffer(file);
-    }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    currentWorkbook = XLSX.read(data, { type: 'array' });
 
-    // Render Tab Sheet jika File Memiliki Banyak Sheet
-    function renderSheetTabs(sheetNames) {
-      const tabsContainer = document.getElementById('sheetTabs');
-      tabsContainer.innerHTML = '';
+                    // Set metadata
+                    document.getElementById('fileMetaName').innerText = file.name;
+                    document.getElementById('fileMetaSheets').innerText = currentWorkbook.SheetNames.length;
 
-      sheetNames.forEach((name, index) => {
-        const btn = document.createElement('button');
-        btn.textContent = name;
-        btn.className = `sheet-tab text-xs px-3 py-1.5 rounded-lg border font-medium whitespace-nowrap transition ${
-          index === 0 
-            ? 'bg-emerald-600 text-white border-emerald-500' 
-            : 'bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-700'
-        }`;
-        btn.onclick = () => {
-          document.querySelectorAll('.sheet-tab').forEach(t => {
-            t.className = 'sheet-tab text-xs px-3 py-1.5 rounded-lg border font-medium whitespace-nowrap transition bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-700';
-          });
-          btn.className = 'sheet-tab text-xs px-3 py-1.5 rounded-lg border font-medium whitespace-nowrap transition bg-emerald-600 text-white border-emerald-500';
-          switchSheet(name);
-        };
-        tabsContainer.appendChild(btn);
-      });
-    }
+                    // Populate Sheet Dropdown
+                    const sheetSelect = document.getElementById('sheetSelect');
+                    sheetSelect.innerHTML = '';
+                    currentWorkbook.SheetNames.forEach(sheetName => {
+                        const option = document.createElement('option');
+                        option.value = sheetName;
+                        option.innerText = sheetName;
+                        sheetSelect.appendChild(option);
+                    });
 
-    // Berpindah Antar Sheet
-    function switchSheet(sheetName) {
-      const sheet = globalWorkbook.Sheets[sheetName];
-      // Convert sheet data ke JSON Array (2D)
-      currentSheetData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
-      filteredSheetData = [...currentSheetData];
+                    // Render First Sheet
+                    loadSheet(currentWorkbook.SheetNames[0]);
 
-      document.getElementById('searchInput').value = '';
-      renderTable(filteredSheetData);
-    }
+                    document.getElementById('loadingSpinner').classList.add('hidden');
+                    document.getElementById('dashboardContent').classList.remove('hidden');
+                    document.getElementById('btnReset').classList.remove('hidden');
+                } catch (err) {
+                    alert('Gagal membaca file. Pastikan file dalam format .xlsx, .xls, atau .csv yang valid.');
+                    resetApp();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
 
-    // Render Data ke Dalam Tabel HTML secara Cepat
-    function renderTable(data) {
-      const thead = document.getElementById('tableHead');
-      const tbody = document.getElementById('tableBody');
-      thead.innerHTML = '';
-      tbody.innerHTML = '';
+        function changeSheet() {
+            const selectedSheet = document.getElementById('sheetSelect').value;
+            loadSheet(selectedSheet);
+        }
 
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td class="p-4 text-center text-slate-500 text-xs">Sheet ini kosong.</td></tr>`;
-        updateStats(0, 0);
-        return;
-      }
+        function loadSheet(sheetName) {
+            const worksheet = currentWorkbook.Sheets[sheetName];
+            currentSheetData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
-      // Baris Pertama sebagai Header
-      const headerRow = data[0];
-      const trHead = document.createElement('tr');
-      
-      // Tambah kolom Nomor (Index)
-      const thIndex = document.createElement('th');
-      thIndex.className = 'p-3 text-slate-400 font-normal text-center w-12 border-b border-slate-700';
-      thIndex.textContent = '#';
-      trHead.appendChild(thIndex);
+            if (currentSheetData.length === 0) {
+                alert("Sheet ini kosong!");
+                return;
+            }
 
-      headerRow.forEach((col) => {
-        const th = document.createElement('th');
-        th.className = 'p-3 whitespace-nowrap font-semibold border-b border-slate-700';
-        th.textContent = col !== undefined && col !== "" ? col : "Kolom Tanpa Nama";
-        trHead.appendChild(th);
-      });
-      thead.appendChild(trHead);
+            analyzeAndRender(currentSheetData);
+        }
 
-      // Render Baris Body (Optimized Document Fragment)
-      const fragment = document.createDocumentFragment();
-      const rowsToRender = data.slice(1);
+        function analyzeAndRender(data) {
+            const keys = Object.keys(data[0] || {});
+            const totalRows = data.length;
+            const totalCols = keys.length;
 
-      rowsToRender.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-700/40 transition border-b border-slate-700/30';
+            let nullCount = 0;
+            let numericCols = [];
+            let categoricalCols = [];
 
-        // Index Nomor
-        const tdIndex = document.createElement('td');
-        tdIndex.className = 'p-3 text-slate-500 text-center text-xs font-mono';
-        tdIndex.textContent = rowIndex + 1;
-        tr.appendChild(tdIndex);
+            // Detect column types & nulls
+            keys.forEach(key => {
+                let isNumeric = true;
+                let hasValue = false;
 
-        headerRow.forEach((_, colIndex) => {
-          const td = document.createElement('td');
-          td.className = 'p-3 whitespace-nowrap text-slate-300';
-          const val = row[colIndex];
-          td.textContent = val !== undefined ? val : "";
-          tr.appendChild(td);
-        });
+                for (let i = 0; i < data.length; i++) {
+                    const val = data[i][key];
+                    if (val === "" || val === null || val === undefined) {
+                        nullCount++;
+                    } else {
+                        hasValue = true;
+                        if (isNaN(Number(val))) {
+                            isNumeric = false;
+                        }
+                    }
+                }
 
-        fragment.appendChild(tr);
-      });
+                if (isNumeric && hasValue) {
+                    numericCols.push(key);
+                } else {
+                    categoricalCols.push(key);
+                }
+            });
 
-      tbody.appendChild(fragment);
-      updateStats(rowsToRender.length, headerRow.length);
-    }
+            // Update Metric Stat Cards
+            document.getElementById('statRows').innerText = totalRows.toLocaleString('id-ID');
+            document.getElementById('statCols').innerText = totalCols;
+            document.getElementById('statNumCols').innerText = numericCols.length;
+            document.getElementById('statNulls').innerText = nullCount.toLocaleString('id-ID');
 
-    // Fitur Filter / Pencarian Instan
-    function filterData() {
-      const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (!query) {
-        filteredSheetData = [...currentSheetData];
-      } else {
-        const header = currentSheetData[0];
-        const rows = currentSheetData.slice(1);
-        
-        const matchedRows = rows.filter(row => {
-          return row.some(cell => String(cell).toLowerCase().includes(query));
-        });
+            // Generate Auto Insights
+            generateInsights(data, keys, numericCols, categoricalCols);
 
-        filteredSheetData = [header, ...matchedRows];
-      }
-      renderTable(filteredSheetData);
-    }
+            // Populate Chart Column Options
+            const chartColSelect = document.getElementById('chartColumnSelect');
+            chartColSelect.innerHTML = '';
+            
+            const targetCols = numericCols.length > 0 ? numericCols : keys;
+            targetCols.forEach(col => {
+                const opt = document.createElement('option');
+                opt.value = col;
+                opt.innerText = col;
+                chartColSelect.appendChild(opt);
+            });
 
-    // Helper Status & Loading
-    function updateStats(totalRows, totalCols) {
-      document.getElementById('fileStats').textContent = `${totalRows} baris data | ${totalCols} kolom`;
-      document.getElementById('rowCountInfo').textContent = `Menampilkan ${totalRows} baris`;
-    }
+            // Render Table & Chart
+            renderTable(data, keys);
+            updateChart();
+        }
 
-    function showLoading(isLoading) {
-      const loadingState = document.getElementById('loadingState');
-      const emptyState = document.getElementById('emptyState');
-      if (isLoading) {
-        loadingState.classList.remove('hidden');
-        emptyState.classList.add('hidden');
-      } else {
-        loadingState.classList.add('hidden');
-      }
-    }
-  </script>
+        function generateInsights(data, keys, numericCols, categoricalCols) {
+            const container = document.getElementById('insightsList');
+            container.innerHTML = '';
+
+            const insights = [];
+
+            // Insight 1: Summary Rows/Cols
+            insights.push(`Sheet ini berisi <b>${data.length} baris</b> dan <b>${keys.length} kolom</b>.`);
+
+            // Insight 2: Numeric Columns Summary
+            if (numericCols.length > 0) {
+                const target = numericCols[0];
+                let sum = 0, min = Infinity, max = -Infinity;
+                let validCount = 0;
+
+                data.forEach(row => {
+                    const val = parseFloat(row[target]);
+                    if (!isNaN(val)) {
+                        sum += val;
+                        if (val < min) min = val;
+                        if (val > max) max = val;
+                        validCount++;
+                    }
+                });
+
+                const avg = validCount > 0 ? (sum / validCount).toFixed(2) : 0;
+
+                insights.push(`Kolom <b>"${target}"</b>: Total = <b>${sum.toLocaleString('id-ID')}</b>, Rata-rata = <b>${Number(avg).toLocaleString('id-ID')}</b>.`);
+                insights.push(`Nilai tertinggi pada <b>"${target}"</b> adalah <b>${max.toLocaleString('id-ID')}</b>, dan terendah adalah <b>${min.toLocaleString('id-ID')}</b>.`);
+            }
+
+            // Insight 3: Categorical Column Top Frequency
+            if (categoricalCols.length > 0) {
+                const target = categoricalCols[0];
+                const freqMap = {};
+                data.forEach(row => {
+                    const val = row[target];
+                    if (val) freqMap[val] = (freqMap[val] || 0) + 1;
+                });
+
+                let topKey = "", maxFreq = 0;
+                for (const k in freqMap) {
+                    if (freqMap[k] > maxFreq) {
+                        maxFreq = freqMap[k];
+                        topKey = k;
+                    }
+                }
+
+                if (topKey) {
+                    const pct = ((maxFreq / data.length) * 100).toFixed(1);
+                    insights.push(`Kategori dominan pada <b>"${target}"</b> adalah <b>"${topKey}"</b> (${pct}% dari total data).`);
+                }
+            }
+
+            // Render Insights to UI
+            insights.forEach(text => {
+                const item = document.createElement('div');
+                item.className = 'p-3 bg-slate-900/60 rounded-lg border border-slate-700/50 flex items-start space-x-2';
+                item.innerHTML = `<i class="fa-solid fa-circle-info text-emerald-400 mt-1 text-xs"></i><span>${text}</span>`;
+                container.appendChild(item);
+            });
+        }
+
+        function updateChart() {
+            const col = document.getElementById('chartColumnSelect').value;
+            const chartType = document.getElementById('chartTypeSelect').value;
+
+            if (!col) return;
+
+            // Limit preview to 20 items for readable chart
+            const sliceData = currentSheetData.slice(0, 20);
+            const labels = sliceData.map((_, idx) => `Baris ${idx + 1}`);
+            const values = sliceData.map(row => parseFloat(row[col]) || 0);
+
+            const ctx = document.getElementById('dataChart').getContext('2d');
+
+            if (myChartInstance) {
+                myChartInstance.destroy();
+            }
+
+            myChartInstance = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: col,
+                        data: values,
+                        backgroundColor: chartType === 'pie' ? [
+                            '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6',
+                            '#06b6d4', '#ec4899', '#f97316', '#14b8a6', '#6366f1'
+                        ] : 'rgba(16, 185, 129, 0.5)',
+                        borderColor: '#10b981',
+                        borderWidth: 1.5,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1' }
+                        }
+                    },
+                    scales: chartType !== 'pie' ? {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+                    } : {}
+                }
+            });
+        }
+
+        function renderTable(data, keys) {
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // Header
+            const trHead = document.createElement('tr');
+            keys.forEach(k => {
+                const th = document.createElement('th');
+                th.className = 'px-4 py-3 font-semibold border-b border-slate-700 whitespace-nowrap';
+                th.innerText = k;
+                trHead.appendChild(th);
+            });
+            thead.appendChild(trHead);
+
+            // Body (Limit 100 rows for view performance)
+            const limit = Math.min(data.length, 100);
+            for (let i = 0; i < limit; i++) {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-700/40 transition';
+                keys.forEach(k => {
+                    const td = document.createElement('td');
+                    td.className = 'px-4 py-2.5 border-b border-slate-700/50 whitespace-nowrap text-slate-300';
+                    td.innerText = data[i][k] !== undefined ? data[i][k] : '';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            }
+
+            document.getElementById('recordCountInfo').innerText = `Menampilkan ${limit} dari ${data.length} baris`;
+        }
+
+        function filterTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#tableBody tr');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        function resetApp() {
+            currentWorkbook = null;
+            currentSheetData = [];
+            if (myChartInstance) myChartInstance.destroy();
+
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('dashboardContent').classList.add('hidden');
+            document.getElementById('btnReset').classList.add('hidden');
+            document.getElementById('loadingSpinner').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
