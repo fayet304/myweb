@@ -6,7 +6,7 @@
     <title>Dashboard Audit & Rekonsiliasi QRIS Keuangan</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS untuk baca CSV/Excel -->
+    <!-- PapaParse untuk parsing CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -40,7 +40,7 @@
         <div class="bg-blue-950/50 border border-blue-800 text-blue-200 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
             <span class="text-xl">💡</span>
             <div>
-                <strong class="font-semibold">Fitur Anti-Hilang (LocalStorage Aktif):</strong> Data Master Admin dan file Settlement harian yang Anda unggah akan otomatis tersimpan di browser Anda. Refresh atau tutup halaman tidak akan menghapus data Anda.
+                <strong class="font-semibold">Mode Tablet Aktif (LocalStorage Tersimpan):</strong> Data Master Admin bulanan dan file Settlement harian aman tersimpan di memori browser Anda. Refresh halaman tidak akan menghapus data.
             </div>
         </div>
 
@@ -55,12 +55,11 @@
                         </h2>
                         <span id="adminStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300">Belum Ada File</span>
                     </div>
-                    <p class="text-xs text-slate-400 mb-4">Unggah file CSV detail transaksi admin untuk rentang waktu sebulan atau lebih.</p>
+                    <p class="text-xs text-slate-400 mb-4">Unggah 1 file CSV admin untuk rentang sebulan penuh atau lebih.</p>
                     
                     <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
                         <span class="text-2xl mb-1 group-hover:scale-110 transition">📄</span>
-                        <span class="text-xs font-medium text-slate-300">Klik untuk pilih file CSV Admin</span>
-                        <span class="text-[10px] text-slate-500 mt-1">(.csv maks besar file fleksibel)</span>
+                        <span class="text-xs font-medium text-slate-300 text-center">Ketuk untuk pilih file CSV Admin</span>
                         <input type="file" id="adminFile" accept=".csv" class="hidden" onchange="handleAdminUpload(event)">
                     </label>
                 </div>
@@ -76,12 +75,11 @@
                         </h2>
                         <span id="settleCountBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300">0 File Tersimpan</span>
                     </div>
-                    <p class="text-xs text-slate-400 mb-4">Pilih satu atau banyak file CSV settlement harian dari dashboard QRIS secara berkala.</p>
+                    <p class="text-xs text-slate-400 mb-4">Pilih banyak file CSV settlement harian sekaligus secara berkala.</p>
                     
                     <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
                         <span class="text-2xl mb-1 group-hover:scale-110 transition">📁</span>
-                        <span class="text-xs font-medium text-slate-300">Klik untuk pilih File Settlement QRIS</span>
-                        <span class="text-[10px] text-slate-500 mt-1">(Bisa pilih banyak file sekaligus)</span>
+                        <span class="text-xs font-medium text-slate-300 text-center">Ketuk untuk pilih File Settlement QRIS</span>
                         <input type="file" id="settleFiles" accept=".csv" multiple class="hidden" onchange="handleSettlementUpload(event)">
                     </label>
                 </div>
@@ -118,7 +116,7 @@
             <div class="p-5 border-b border-slate-700 flex justify-between items-center">
                 <div>
                     <h2 class="font-bold text-base text-white">Wishlist & Rekonsiliasi Matriks Harian</h2>
-                    <p class="text-xs text-slate-400">Pencocokan otomatis antara omset admin harian dengan file settlement QRIS harian.</p>
+                    <p class="text-xs text-slate-400">Pencocokan otomatis omset admin harian dengan file settlement harian.</p>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -148,9 +146,8 @@
     <!-- JavaScript Logic -->
     <script>
         let adminData = [];
-        let settlementBatches = {}; // Menyimpan file settlement berdasarkan nama/tanggal
+        let settlementBatches = {};
 
-        // Load data dari LocalStorage saat halaman dibuka
         window.onload = function() {
             const savedAdmin = localStorage.getItem('audit_admin_data');
             const savedSettle = localStorage.getItem('audit_settle_data');
@@ -161,7 +158,7 @@
                     document.getElementById('adminStatusBadge').innerText = `${adminData.length.toLocaleString()} Baris Dimuat`;
                     document.getElementById('adminStatusBadge').className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold";
                     document.getElementById('adminFileInfo').style.display = 'block';
-                    document.getElementById('adminFileInfo').innerHTML = `✅ <strong>Master Admin Tersimpan di Browser</strong> (${adminData.length} transaksi)`;
+                    document.getElementById('adminFileInfo').innerHTML = `✅ <strong>Master Admin Tersimpan di Tablet</strong> (${adminData.length} transaksi)`;
                 } catch(e) { console.error(e); }
             }
 
@@ -181,7 +178,6 @@
             }
         };
 
-        // Handle Admin Upload
         function handleAdminUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -191,7 +187,6 @@
                 skipEmptyLines: true,
                 complete: function(results) {
                     adminData = results.data.map(row => {
-                        // Bersihkan spasi key & string
                         let cleanRow = {};
                         for (let k in row) {
                             cleanRow[k.trim()] = typeof row[k] === 'string' ? row[k].trim() : row[k];
@@ -199,7 +194,6 @@
                         return cleanRow;
                     });
 
-                    // Simpan ke LocalStorage
                     localStorage.setItem('audit_admin_data', JSON.stringify(adminData));
 
                     document.getElementById('adminStatusBadge').innerText = `${adminData.length.toLocaleString()} Baris Dimuat`;
@@ -212,7 +206,7 @@
             });
         }
 
-        // Handle Settlement Upload (Multi-file support)
+        // Smart parser tahan terhadap header bertingkat QRIS
         function handleSettlementUpload(event) {
             const files = event.target.files;
             if (!files.length) return;
@@ -220,35 +214,44 @@
             let loadedCount = 0;
             Array.from(files).forEach(file => {
                 Papa.parse(file, {
-                    header: true,
+                    header: false,
                     skipEmptyLines: true,
                     complete: function(results) {
-                        // Lewati baris header kosong jika ada format row 0 header
-                        let rows = results.data;
-                        if (rows.length > 0 && (!rows[0]['RECORD VALUE'] && !rows[0]['RECORD_VALUE'])) {
-                            // Jika format CSV ada deskripsi di atas
-                            rows = rows.slice(1);
+                        let rawRows = results.data;
+                        let headerRowIndex = 0;
+
+                        for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
+                            let rowStr = rawRows[i].join(' ').toUpperCase();
+                            if (rowStr.includes('PARTNER ID') || rowStr.includes('RECORD VALUE') || rowStr.includes('TICKET')) {
+                                headerRowIndex = i;
+                                break;
+                            }
                         }
 
-                        settlementBatches[file.name] = rows.map(row => {
-                            let cleanRow = {};
-                            for (let k in row) {
-                                cleanRow[k.trim()] = typeof row[k] === 'string' ? row[k].trim() : row[k];
+                        let headers = rawRows[headerRowIndex].map(h => h.trim());
+                        let parsedData = [];
+
+                        for (let i = headerRowIndex + 1; i < rawRows.length; i++) {
+                            let cols = rawRows[i];
+                            if (cols.length >= headers.length) {
+                                let obj = {};
+                                headers.forEach((h, idx) => {
+                                    obj[h] = cols[idx] ? cols[idx].trim() : '';
+                                });
+                                parsedData.push(obj);
                             }
-                            return cleanRow;
-                        });
+                        }
 
+                        settlementBatches[file.name] = parsedData;
                         loadedCount++;
-                        if (loadedCount === files.length) {
-                            // Simpan ke LocalStorage
-                            localStorage.setItem('audit_settle_data', JSON.stringify(settlementBatches));
 
+                        if (loadedCount === files.length) {
+                            localStorage.setItem('audit_settle_data', JSON.stringify(settlementBatches));
                             const fileCount = Object.keys(settlementBatches).length;
                             document.getElementById('settleCountBadge').innerText = `${fileCount} File Tersimpan`;
-                            document.getElementById('settleCountBadge').className = "text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 font-semibold";
                             document.getElementById('settleFileInfo').style.display = 'block';
-                            document.getElementById('settleFileInfo').innerHTML = `✅ Total <strong>${fileCount} file settlement</strong> tersimpan di browser.`;
-
+                            document.getElementById('settleFileInfo').innerHTML = `✅ Berhasil membaca & menyimpan <strong>${fileCount} file settlement</strong>.`;
+                            
                             runReconciliation();
                         }
                     }
@@ -256,11 +259,9 @@
             });
         }
 
-        // Core Reconciliation Engine
         function runReconciliation() {
             if (!adminData.length) return;
 
-            // 1. Group Admin Data by Date
             let adminByDate = {};
             let totalAdminTxAll = 0;
             let totalAdminNominalAll = 0;
@@ -284,8 +285,7 @@
                 totalAdminNominalAll += amount;
             });
 
-            // 2. Kumpulkan semua Order ID dari settlement files yang diupload
-            let allSettlementOrderIds = new Map(); // orderId -> { gross, fee }
+            let allSettlementOrderIds = new Map();
             let totalSettleTxAll = 0;
             let totalSettleGrossAll = 0;
             let totalSettleFeeAll = 0;
@@ -305,22 +305,18 @@
                 });
             }
 
-            // Update Summary Cards
             document.getElementById('sumAdminTx').innerText = totalAdminTxAll.toLocaleString();
             document.getElementById('sumAdminNominal').innerText = `Rp ${totalAdminNominalAll.toLocaleString('id-ID')}`;
             document.getElementById('sumSettleTx').innerText = totalSettleTxAll.toLocaleString();
             document.getElementById('sumSettleNominal').innerText = `Rp ${totalSettleGrossAll.toLocaleString('id-ID')}`;
             document.getElementById('sumFeeNominal').innerText = `Rp ${totalSettleFeeAll.toLocaleString('id-ID')}`;
 
-            // 3. Render Wishlist Matrix Table
             let sortedDates = Object.keys(adminByDate).sort();
             let html = '';
             let matchedDaysCount = 0;
 
             sortedDates.forEach(date => {
                 let adminInfo = adminByDate[date];
-                
-                // Hitung berapa order ID dari tanggal admin ini yang sudah masuk di settlement files
                 let matchedCount = 0;
                 let settleGrossForDate = 0;
                 let settleFeeForDate = 0;
@@ -369,9 +365,8 @@
             }
         }
 
-        // Reset Semua Data
         function resetAllData() {
-            if (confirm("Apakah Anda yakin ingin menghapus seluruh data yang tersimpan di browser?")) {
+            if (confirm("Yakin ingin menghapus seluruh data yang tersimpan di tablet?")) {
                 localStorage.removeItem('audit_admin_data');
                 localStorage.removeItem('audit_settle_data');
                 adminData = [];
