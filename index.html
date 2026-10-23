@@ -22,7 +22,7 @@
                 <div class="bg-emerald-500 p-2.5 rounded-xl text-slate-900 font-bold text-xl shadow-lg">📊</div>
                 <div>
                     <h1 class="text-lg font-bold tracking-tight text-white">Audit & Rekonsiliasi QRIS</h1>
-                    <p class="text-xs text-slate-400">Sistem Cutoff 23:30 • Pencocokan Otomatis</p>
+                    <p class="text-xs text-slate-400">Sistem Cutoff 23:30 • Pagination per 100 Data</p>
                 </div>
             </div>
 
@@ -32,7 +32,7 @@
                     📊 Dashboard & Wishlist
                 </button>
                 <button id="tabNavHistory" onclick="switchTab('history')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg transition">
-                    📜 History & Detail Transaksi
+                    📜 History Transaksi
                 </button>
             </nav>
 
@@ -51,7 +51,7 @@
         <div class="bg-blue-950/50 border border-blue-800 text-blue-200 px-4 py-3 rounded-xl text-xs sm:text-sm flex items-start space-x-3 shadow-inner">
             <span class="text-xl">💡</span>
             <div>
-                <strong class="font-semibold">Mode Tablet & Multi-Halaman:</strong> Data tersimpan aman di browser Anda. Gunakan tab **History & Detail Transaksi** untuk memfilter per User ID, ID Transaksi, atau mengekspor hasil audit ke CSV.
+                <strong class="font-semibold">Mode Pagination Aktif:</strong> Data history dibagi per 100 transaksi per halaman agar ringan diakses di tablet.
             </div>
         </div>
 
@@ -155,14 +155,14 @@
             </div>
         </div>
 
-        <!-- ================= PAGE 2: HISTORY & DETAIL TRANSAKSI ================= -->
+        <!-- ================= PAGE 2: HISTORY & PAGINATION ================= -->
         <div id="pageHistory" class="space-y-6 hidden">
-            <!-- Filter Control Bar -->
+            <!-- Filter & Controls -->
             <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h2 class="font-bold text-base text-white">📜 History Detail Transaksi Matched</h2>
-                        <p class="text-xs text-slate-400">Pencarian cepat dan pencatatan per item transaksi yang berhasil dicocokkan.</p>
+                        <h2 class="font-bold text-base text-white">📜 History Detail Transaksi (Per 100 Data)</h2>
+                        <p class="text-xs text-slate-400">Pencarian cepat dan navigasi halaman per 100 baris.</p>
                     </div>
                     <button onclick="exportHistoryToCSV()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center space-x-2">
                         <span>📥</span> <span>Export CSV Hasil Audit</span>
@@ -170,50 +170,58 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                    <!-- Search Input -->
                     <div>
                         <label class="text-xs text-slate-400 font-medium block mb-1">Cari Order ID / User ID</label>
-                        <input type="text" id="historySearch" oninput="filterHistoryTable()" placeholder="Ketik XPay... atau username..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                        <input type="text" id="historySearch" oninput="onSearchInput()" placeholder="Ketik XPay... atau username..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                     </div>
-                    <!-- Status Filter -->
                     <div>
                         <label class="text-xs text-slate-400 font-medium block mb-1">Status Pencocokan</label>
-                        <select id="historyFilterStatus" onchange="filterHistoryTable()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                            <option value="ALL">Semua Status (Matched & Unmatched)</option>
+                        <select id="historyFilterStatus" onchange="onSearchInput()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            <option value="ALL">Semua Status</option>
                             <option value="MATCHED" selected>🟢 Hanya Matched (100% Klop)</option>
                             <option value="UNMATCHED">🔴 Belum Ada di QRIS Settlement</option>
                         </select>
                     </div>
-                    <!-- Counter -->
                     <div class="flex items-end">
                         <div class="bg-slate-900/80 border border-slate-700 px-4 py-2 rounded-xl w-full text-xs text-slate-300">
-                            Menampilkan: <strong id="historyFilteredCount" class="text-emerald-400">0</strong> transaksi
+                            Total Data Ditemukan: <strong id="historyFilteredCount" class="text-emerald-400">0</strong>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Detailed History Table -->
+            <!-- History Table -->
             <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-lg overflow-hidden">
-                <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+                <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs">
-                        <thead class="sticky top-0 bg-slate-900/90 backdrop-blur text-slate-400 uppercase border-b border-slate-700 z-10">
+                        <thead class="bg-slate-900/90 text-slate-400 uppercase border-b border-slate-700">
                             <tr>
-                                <th class="p-3">Order ID / Rekening</th>
-                                <th class="p-3">User ID</th>
-                                <th class="p-3">Tanggal Admin</th>
-                                <th class="p-3 text-right">Nominal Admin</th>
-                                <th class="p-3 text-right">Nominal QRIS</th>
-                                <th class="p-3 text-right">Fee MDR</th>
-                                <th class="p-3 text-center">Status</th>
+                                <th class="p-3.5">No</th>
+                                <th class="p-3.5">Order ID / Rekening</th>
+                                <th class="p-3.5">User ID</th>
+                                <th class="p-3.5">Tanggal Admin</th>
+                                <th class="p-3.5 text-right">Nominal Admin</th>
+                                <th class="p-3.5 text-right">Nominal QRIS</th>
+                                <th class="p-3.5 text-right">Fee MDR</th>
+                                <th class="p-3.5 text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody" class="divide-y divide-slate-700/50 text-slate-300 font-mono">
                             <tr>
-                                <td colspan="7" class="p-6 text-center text-slate-500">Belum ada data transaksi yang dimuat.</td>
+                                <td colspan="8" class="p-6 text-center text-slate-500">Belum ada data transaksi yang dimuat.</td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination Bar -->
+                <div class="p-4 bg-slate-900/60 border-t border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <div class="text-xs text-slate-400" id="paginationInfo">
+                        Menampilkan halaman 1 dari 1 (Total 0 data)
+                    </div>
+                    <div class="flex items-center space-x-1" id="paginationControls">
+                        <!-- Tombol pagination digenerate otomatis via script -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -224,7 +232,9 @@
     <script>
         let adminData = [];
         let settlementBatches = {};
-        let matchedHistoryData = []; // Menyimpan item terpadu untuk halaman History
+        let matchedHistoryData = [];
+        let currentPage = 1;
+        let rowsPerPage = 100;
 
         window.onload = function() {
             const savedAdmin = localStorage.getItem('audit_admin_data');
@@ -233,13 +243,10 @@
             if (savedAdmin) {
                 try {
                     adminData = JSON.parse(savedAdmin);
-                    const badge = document.getElementById('adminStatusBadge');
-                    badge.innerText = `${adminData.length.toLocaleString()} Baris Dimuat`;
-                    badge.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold";
-                    
-                    const info = document.getElementById('adminFileInfo');
-                    info.style.display = 'block';
-                    info.innerHTML = `✅ <strong>Master Admin Tersimpan</strong> (${adminData.length.toLocaleString()} transaksi)`;
+                    document.getElementById('adminStatusBadge').innerText = `${adminData.length.toLocaleString()} Baris Dimuat`;
+                    document.getElementById('adminStatusBadge').className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold";
+                    document.getElementById('adminFileInfo').style.display = 'block';
+                    document.getElementById('adminFileInfo').innerHTML = `✅ <strong>Master Admin Tersimpan</strong> (${adminData.length.toLocaleString()} transaksi)`;
                 } catch(e) { console.error(e); }
             }
 
@@ -247,13 +254,10 @@
                 try {
                     settlementBatches = JSON.parse(savedSettle);
                     const fileCount = Object.keys(settlementBatches).length;
-                    const badge = document.getElementById('settleCountBadge');
-                    badge.innerText = `${fileCount} File Tersimpan`;
-                    badge.className = "text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 font-semibold";
-                    
-                    const info = document.getElementById('settleFileInfo');
-                    info.style.display = 'block';
-                    info.innerHTML = `✅ <strong>${fileCount} File Settlement Tersimpan</strong>`;
+                    document.getElementById('settleCountBadge').innerText = `${fileCount} File Tersimpan`;
+                    document.getElementById('settleCountBadge').className = "text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 font-semibold";
+                    document.getElementById('settleFileInfo').style.display = 'block';
+                    document.getElementById('settleFileInfo').innerHTML = `✅ <strong>${fileCount} File Settlement Tersimpan</strong>`;
                 } catch(e) { console.error(e); }
             }
 
@@ -262,7 +266,6 @@
             }
         };
 
-        // Switch Tab Navigation
         function switchTab(tabName) {
             const pageDashboard = document.getElementById('pageDashboard');
             const pageHistory = document.getElementById('pageHistory');
@@ -279,6 +282,7 @@
                 pageHistory.classList.remove('hidden');
                 btnHist.className = "px-4 py-2 text-xs font-semibold rounded-lg transition bg-emerald-500 text-slate-900 shadow";
                 btnDash.className = "px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg transition";
+                currentPage = 1;
                 renderHistoryTable();
             }
         }
@@ -292,9 +296,8 @@
 
             badge.innerText = "⏳ Memproses...";
             badge.className = "text-xs px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-400 font-semibold animate-pulse";
-
             info.style.display = 'block';
-            info.innerHTML = `<span class="text-yellow-400">⏳ Membaca file (${(file.size / (1024*1024)).toFixed(2)} MB)... Mohon tunggu sebentar.</span>`;
+            info.innerHTML = `<span class="text-yellow-400">⏳ Membaca file (${(file.size / (1024*1024)).toFixed(2)} MB)... Mohon tunggu.</span>`;
 
             setTimeout(() => {
                 Papa.parse(file, {
@@ -309,9 +312,7 @@
                             return cleanRow;
                         });
 
-                        try {
-                            localStorage.setItem('audit_admin_data', JSON.stringify(adminData));
-                        } catch(e) {}
+                        try { localStorage.setItem('audit_admin_data', JSON.stringify(adminData)); } catch(e) {}
 
                         badge.innerText = `${adminData.length.toLocaleString()} Baris Dimuat`;
                         badge.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold";
@@ -332,7 +333,6 @@
 
             badge.innerText = "⏳ Membaca...";
             badge.className = "text-xs px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-400 font-semibold animate-pulse";
-
             info.style.display = 'block';
             info.innerHTML = `<span class="text-yellow-400">🔄 Sedang mengolah ${files.length} file settlement...</span>`;
 
@@ -372,9 +372,7 @@
                             loadedCount++;
 
                             if (loadedCount === files.length) {
-                                try {
-                                    localStorage.setItem('audit_settle_data', JSON.stringify(settlementBatches));
-                                } catch(e) {}
+                                try { localStorage.setItem('audit_settle_data', JSON.stringify(settlementBatches)); } catch(e) {}
 
                                 const fileCount = Object.keys(settlementBatches).length;
                                 badge.innerText = `${fileCount} File Tersimpan`;
@@ -389,7 +387,6 @@
             }, 100);
         }
 
-        // Core Reconciliation Engine & History Builder
         function runReconciliation() {
             if (!adminData.length) return;
 
@@ -397,7 +394,6 @@
             let totalAdminTxAll = 0;
             let totalAdminNominalAll = 0;
 
-            // Kumpulkan semua Order ID dari Settlement QRIS
             let allSettlementOrderIds = new Map();
             let totalSettleTxAll = 0;
             let totalSettleGrossAll = 0;
@@ -410,7 +406,7 @@
                     let fee = parseFloat(row['RECORD FEE'] || row['RECORD_FEE'] || 0);
 
                     if (orderId) {
-                        allSettlementOrderIds.set(orderId, { gross: val, fee: fee, fileName: fileName });
+                        allSettlementOrderIds.set(orderId, { gross: val, fee: fee });
                         totalSettleTxAll++;
                         totalSettleGrossAll += val;
                         totalSettleFeeAll += fee;
@@ -439,7 +435,6 @@
                 totalAdminTxAll++;
                 totalAdminNominalAll += amount;
 
-                // Bangun struktur detail untuk Halaman History
                 let isMatched = allSettlementOrderIds.has(orderId);
                 let qrisInfo = isMatched ? allSettlementOrderIds.get(orderId) : { gross: 0, fee: 0 };
 
@@ -460,7 +455,6 @@
             document.getElementById('sumSettleNominal').innerText = `Rp ${totalSettleGrossAll.toLocaleString('id-ID')}`;
             document.getElementById('sumFeeNominal').innerText = `Rp ${totalSettleFeeAll.toLocaleString('id-ID')}`;
 
-            // Render Matriks Wishlist
             let sortedDates = Object.keys(adminByDate).sort();
             let html = '';
             let matchedDaysCount = 0;
@@ -517,7 +511,12 @@
             renderHistoryTable();
         }
 
-        // Render & Filter Tabel History
+        function onSearchInput() {
+            currentPage = 1;
+            renderHistoryTable();
+        }
+
+        // Render Tabel History dengan Pagination 100 item per page
         function renderHistoryTable() {
             if (!matchedHistoryData.length) return;
 
@@ -532,17 +531,23 @@
 
             document.getElementById('historyFilteredCount').innerText = filtered.length.toLocaleString();
 
-            let html = '';
-            // Tampilkan maksimal 500 baris pertama untuk kecepatan render browser tablet
-            let displayList = filtered.slice(0, 500);
+            let totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
 
-            displayList.forEach(item => {
+            let startIndex = (currentPage - 1) * rowsPerPage;
+            let endIndex = startIndex + rowsPerPage;
+            let pageItems = filtered.slice(startIndex, endIndex);
+
+            let html = '';
+            pageItems.forEach((item, index) => {
+                let rowNumber = startIndex + index + 1;
                 let badge = item.status === 'MATCHED' 
                     ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">MATCHED</span>`
-                    : `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-400 font-semibold">UNMATCHED</span>`;
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-400">UNMATCHED</span>`;
 
                 html += `
                     <tr class="hover:bg-slate-700/30 transition">
+                        <td class="p-3 text-slate-500">${rowNumber}</td>
                         <td class="p-3 font-semibold text-white">${item.orderId}</td>
                         <td class="p-3 text-slate-300">${item.userId}</td>
                         <td class="p-3 text-slate-400">${item.date}</td>
@@ -555,17 +560,44 @@
             });
 
             if (filtered.length === 0) {
-                html = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Tidak ada transaksi yang cocok dengan filter pencarian.</td></tr>`;
+                html = `<tr><td colspan="8" class="p-6 text-center text-slate-500">Tidak ada transaksi yang cocok.</td></tr>`;
             }
 
             document.getElementById('historyTableBody').innerHTML = html;
+
+            // Update Info & Kontrol Pagination
+            document.getElementById('paginationInfo').innerText = 
+                `Menampilkan data ${filtered.length > 0 ? startIndex + 1 : 0} - ${Math.min(endIndex, filtered.length)} dari total ${filtered.length.toLocaleString()} data (Halaman ${currentPage} dari ${totalPages})`;
+
+            let paginationHtml = '';
+            // Tombol Previous
+            paginationHtml += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">Prev</button>`;
+
+            // Tombol Halaman (Maksimal menampilkan 5 nomor halaman terdekat)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                let activeClass = p === currentPage ? 'bg-emerald-500 text-slate-900 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700';
+                paginationHtml += `<button onclick="changePage(${p})" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 ${activeClass}">${p}</button>`;
+            }
+
+            // Tombol Next
+            paginationHtml += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">Next</button>`;
+
+            document.getElementById('paginationControls').innerHTML = paginationHtml;
         }
 
-        function filterHistoryTable() {
+        function changePage(targetPage) {
+            currentPage = targetPage;
             renderHistoryTable();
+            // Scroll ke atas tabel history
+            document.getElementById('pageHistory').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Export History Matched Data ke CSV
         function exportHistoryToCSV() {
             if (!matchedHistoryData.length) {
                 alert("Belum ada data untuk diekspor.");
@@ -573,11 +605,12 @@
             }
 
             let csvRows = [
-                ["Order ID / Rekening", "User ID", "Tanggal Transaksi", "Nominal Admin (Rp)", "Nominal QRIS (Rp)", "Fee MDR (Rp)", "Status Audit"]
+                ["No", "Order ID / Rekening", "User ID", "Tanggal Transaksi", "Nominal Admin (Rp)", "Nominal QRIS (Rp)", "Fee MDR (Rp)", "Status Audit"]
             ];
 
-            matchedHistoryData.forEach(item => {
+            matchedHistoryData.forEach((item, index) => {
                 csvRows.push([
+                    index + 1,
                     `"${item.orderId}"`,
                     `"${item.userId}"`,
                     `"${item.date}"`,
