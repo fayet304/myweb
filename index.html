@@ -3,438 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QRIS Reconciliation & Data Analyzer Studio</title>
+    <title>Dashboard Audit & Rekonsiliasi QRIS Keuangan</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS (xlsx) untuk parsing Excel & CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Chart.js untuk Grafik -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <!-- SheetJS untuk baca CSV/Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen">
 
-    <!-- Navigation Header -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
-                <div class="bg-emerald-500 text-slate-950 p-2.5 rounded-xl font-bold text-xl shadow-lg shadow-emerald-500/20">
-                    <i class="fa-solid fa-scale-balanced"></i>
-                </div>
+                <div class="bg-emerald-500 p-2 rounded-lg text-slate-900 font-bold text-xl">📊</div>
                 <div>
-                    <h1 class="text-lg font-bold text-white tracking-wide">QRIS & Data Reconciliation Studio</h1>
-                    <p class="text-xs text-slate-400">Analisis Universal & Pencocokan Settlement Otomatis</p>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Audit & Rekonsiliasi QRIS</h1>
+                    <p class="text-xs text-slate-400">Pusat Kontrol Keuangan & Pencocokan Transaksi Harian</p>
                 </div>
             </div>
-            <!-- Navigation Tabs -->
-            <div class="flex items-center space-x-2">
-                <button onclick="switchTab('single')" id="tabSingleBtn" class="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 transition shadow">
-                    <i class="fa-solid fa-file-excel mr-1.5"></i> Analisis File Tunggal
-                </button>
-                <button onclick="switchTab('reconcile')" id="tabReconcileBtn" class="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-                    <i class="fa-solid fa-people-arrows mr-1.5"></i> Rekonsiliasi (2 File)
+            <div class="flex items-center space-x-3">
+                <button onclick="resetAllData()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow">
+                    🗑️ Reset Semua Data
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-        <!-- ==================== MENU 1: SINGLE FILE ANALYZER ==================== -->
-        <section id="viewSingle" class="space-y-6">
-            <div class="bg-slate-900/90 border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-2xl p-8 text-center cursor-pointer transition relative group shadow-xl" id="dropzoneSingle">
-                <input type="file" id="fileInputSingle" accept=".xlsx, .xls, .csv, .txt" class="hidden" onchange="handleSingleFileSelect(event)">
-                <div class="flex flex-col items-center justify-center space-y-3">
-                    <div class="w-14 h-14 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300 border border-emerald-500/20">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <div>
-                        <p class="text-base font-semibold text-slate-200">Upload File untuk Dianalisa (Excel / CSV / Settlement)</p>
-                        <p class="text-xs text-slate-400 mt-1">Sistem otomatis mendeteksi header & struktur data apapun secara instan</p>
-                    </div>
-                </div>
+        <!-- Info Banner Persistent -->
+        <div class="bg-blue-950/50 border border-blue-800 text-blue-200 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+            <span class="text-xl">💡</span>
+            <div>
+                <strong class="font-semibold">Fitur Anti-Hilang (LocalStorage Aktif):</strong> Data Master Admin dan file Settlement harian yang Anda unggah akan otomatis tersimpan di browser Anda. Refresh atau tutup halaman tidak akan menghapus data Anda.
             </div>
-
-            <!-- Loading Single -->
-            <div id="loadingSingle" class="hidden flex flex-col items-center justify-center py-12 space-y-3">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-                <p class="text-slate-400 text-xs">Memproses dan menganalisa data...</p>
-            </div>
-
-            <!-- Dashboard Result Single -->
-            <div id="dashboardSingle" class="hidden space-y-6">
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div class="text-xs text-slate-300">File: <span class="font-bold text-white" id="metaSingleName">-</span></div>
-                    <button onclick="resetSingle()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700">Ganti File</button>
-                </div>
-
-                <!-- Stat Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="statCardsSingle"></div>
-
-                <!-- Chart & Insights -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 flex flex-col">
-                        <h3 class="font-bold text-slate-200 text-xs border-b border-slate-800 pb-3 mb-3"><i class="fa-solid fa-brain text-emerald-400 mr-2"></i> Ringkasan Otomatis</h3>
-                        <div id="insightsSingle" class="space-y-2.5 text-xs text-slate-300 overflow-y-auto max-h-[260px]"></div>
-                    </div>
-                    <div class="lg:col-span-2 bg-slate-900 p-5 rounded-xl border border-slate-800 flex flex-col">
-                        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
-                            <h3 class="font-bold text-slate-200 text-xs"><i class="fa-solid fa-chart-column text-emerald-400 mr-2"></i> Grafik Visualisasi</h3>
-                            <select id="chartColSingle" onchange="renderChartSingle()" class="bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded px-2 py-1 outline-none"></select>
-                        </div>
-                        <div class="relative w-full h-[250px]"><canvas id="chartCanvasSingle"></canvas></div>
-                    </div>
-                </div>
-
-                <!-- Table Preview -->
-                <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-                    <div class="p-4 border-b border-slate-800 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-200 text-xs"><i class="fa-solid fa-table text-emerald-400 mr-2"></i> Pratinjau Baris Data</h3>
-                        <input type="text" id="searchSingle" onkeyup="filterTableSingle()" placeholder="Cari data..." class="bg-slate-950 text-xs text-slate-200 px-3 py-1.5 rounded border border-slate-800 outline-none">
-                    </div>
-                    <div class="overflow-x-auto max-h-[350px] custom-scrollbar">
-                        <table class="w-full text-left text-xs text-slate-300" id="tableSingle">
-                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0" id="theadSingle"></thead>
-                            <tbody id="tbodySingle" class="divide-y divide-slate-800"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== MENU 2: RECONCILIATION (2 FILES) ==================== -->
-        <section id="viewReconcile" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Upload File 1: Admin -->
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center font-bold border border-blue-500/20">1</div>
-                        <div>
-                            <h3 class="font-bold text-slate-200 text-sm">File Dashboard Admin</h3>
-                            <p class="text-xs text-slate-400">Laporan transaksi internal (CSV/Excel)</p>
-                        </div>
-                    </div>
-                    <div class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer transition" onclick="document.getElementById('fileAdmin').click()">
-                        <input type="file" id="fileAdmin" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleAdminFile(event)">
-                        <p class="text-xs text-slate-300 font-semibold" id="labelAdmin">Klik untuk pilih file Admin</p>
-                    </div>
-                </div>
-
-                <!-- Upload File 2: QRIS Settlement -->
-                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center font-bold border border-indigo-500/20">2</div>
-                        <div>
-                            <h3 class="font-bold text-slate-200 text-sm">File Settlement QRIS</h3>
-                            <p class="text-xs text-slate-400">Laporan pencairan dari Payment Gateway</p>
-                        </div>
-                    </div>
-                    <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-6 text-center cursor-pointer transition" onclick="document.getElementById('fileQris').click()">
-                        <input type="file" id="fileQris" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleQrisFile(event)">
-                        <p class="text-xs text-slate-300 font-semibold" id="labelQris">Klik untuk pilih file Settlement QRIS</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Run Reconciliation Button -->
-            <div class="flex justify-center">
-                <button onclick="runReconciliation()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-xl text-xs transition shadow-lg flex items-center space-x-2">
-                    <i class="fa-solid fa-gears"></i>
-                    <span>Mulai Proses Pencocokan (Rekonsiliasi)</span>
-                </button>
-            </div>
-
-            <!-- Reconciliation Results -->
-            <div id="resultReconcile" class="hidden space-y-6">
-                <!-- Stat Summary Match -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Transaksi Match (Sukses Cair)</p>
-                        <h3 class="text-2xl font-bold text-emerald-400 mt-1" id="recMatchCount">0</h3>
-                        <p class="text-xs text-slate-400 mt-1" id="recMatchVal">Rp 0</p>
-                    </div>
-                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Belum Cair / Unmatched</p>
-                        <h3 class="text-2xl font-bold text-amber-400 mt-1" id="recUnmatchCount">0</h3>
-                        <p class="text-xs text-slate-400 mt-1" id="recUnmatchVal">Rp 0</p>
-                    </div>
-                    <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
-                        <p class="text-xs text-slate-400 uppercase font-semibold">Total Selisih Akumulasi</p>
-                        <h3 class="text-2xl font-bold text-blue-400 mt-1" id="recFeeTotal">Rp 0</h3>
-                        <p class="text-xs text-slate-400 mt-1">Total Fee / Potongan</p>
-                    </div>
-                </div>
-
-                <!-- Detailed Table Match -->
-                <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-                    <div class="p-4 border-b border-slate-800 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-200 text-xs"><i class="fa-solid fa-list-check text-emerald-400 mr-2"></i> Hasil Rekonsiliasi ID Transaksi</h3>
-                        <input type="text" id="searchRec" onkeyup="filterTableRec()" placeholder="Cari ID transaksi..." class="bg-slate-950 text-xs text-slate-200 px-3 py-1.5 rounded border border-slate-800 outline-none">
-                    </div>
-                    <div class="overflow-x-auto max-h-[400px] custom-scrollbar">
-                        <table class="w-full text-left text-xs text-slate-300" id="tableRec">
-                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0">
-                                <tr>
-                                    <th class="px-4 py-3">ID / Reference</th>
-                                    <th class="px-4 py-3">Sumber Admin</th>
-                                    <th class="px-4 py-3">Nominal Admin</th>
-                                    <th class="px-4 py-3">Status QRIS Settlement</th>
-                                    <th class="px-4 py-3">Fee QRIS</th>
-                                    <th class="px-4 py-3">Keterangan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyRec" class="divide-y divide-slate-800"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-4 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-            &copy; 2026 QRIS & Data Reconciliation Studio. Siap Deploy ke GitHub Pages.
         </div>
-    </footer>
+
+        <!-- Section 1: Upload Panel -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Admin Data Upload -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-bold text-base text-white flex items-center space-x-2">
+                            <span>📂</span> <span>1. Master Data Admin (Bulanan)</span>
+                        </h2>
+                        <span id="adminStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300">Belum Ada File</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Unggah file CSV detail transaksi admin untuk rentang waktu sebulan atau lebih.</p>
+                    
+                    <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
+                        <span class="text-2xl mb-1 group-hover:scale-110 transition">📄</span>
+                        <span class="text-xs font-medium text-slate-300">Klik untuk pilih file CSV Admin</span>
+                        <span class="text-[10px] text-slate-500 mt-1">(.csv maks besar file fleksibel)</span>
+                        <input type="file" id="adminFile" accept=".csv" class="hidden" onchange="handleAdminUpload(event)">
+                    </label>
+                </div>
+                <div id="adminFileInfo" class="mt-4 text-xs text-slate-400 hidden bg-slate-900/80 p-3 rounded-lg border border-slate-700"></div>
+            </div>
+
+            <!-- Settlement QRIS Upload -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-bold text-base text-white flex items-center space-x-2">
+                            <span>📥</span> <span>2. Settlement QRIS (Harian / Multi-File)</span>
+                        </h2>
+                        <span id="settleCountBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-700 text-slate-300">0 File Tersimpan</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Pilih satu atau banyak file CSV settlement harian dari dashboard QRIS secara berkala.</p>
+                    
+                    <label class="border-2 border-dashed border-slate-600 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/50 transition group">
+                        <span class="text-2xl mb-1 group-hover:scale-110 transition">📁</span>
+                        <span class="text-xs font-medium text-slate-300">Klik untuk pilih File Settlement QRIS</span>
+                        <span class="text-[10px] text-slate-500 mt-1">(Bisa pilih banyak file sekaligus)</span>
+                        <input type="file" id="settleFiles" accept=".csv" multiple class="hidden" onchange="handleSettlementUpload(event)">
+                    </label>
+                </div>
+                <div id="settleFileInfo" class="mt-4 text-xs text-slate-400 hidden bg-slate-900/80 p-3 rounded-lg border border-slate-700 max-h-24 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <!-- Section 2: Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                <p class="text-xs text-slate-400 uppercase font-semibold">Total Transaksi Admin</p>
+                <h3 id="sumAdminTx" class="text-2xl font-bold text-white mt-1">0</h3>
+                <p id="sumAdminNominal" class="text-xs text-emerald-400 mt-1">Rp 0</p>
+            </div>
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                <p class="text-xs text-slate-400 uppercase font-semibold">Total Settlement QRIS</p>
+                <h3 id="sumSettleTx" class="text-2xl font-bold text-white mt-1">0</h3>
+                <p id="sumSettleNominal" class="text-xs text-blue-400 mt-1">Rp 0</p>
+            </div>
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                <p class="text-xs text-slate-400 uppercase font-semibold">Total Fee MDR (~1.1%)</p>
+                <h3 id="sumFeeNominal" class="text-2xl font-bold text-rose-400 mt-1">Rp 0</h3>
+                <p class="text-xs text-slate-500 mt-1">Potongan Vendor</p>
+            </div>
+            <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow">
+                <p class="text-xs text-slate-400 uppercase font-semibold">Status Audit Global</p>
+                <h3 id="globalAuditStatus" class="text-lg font-bold text-yellow-400 mt-1">Menunggu Data</h3>
+                <p class="text-xs text-slate-400 mt-1">Cross-check harian</p>
+            </div>
+        </div>
+
+        <!-- Section 3: Wishlist Matrix / Tabel Rekonsiliasi Harian -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-lg overflow-hidden">
+            <div class="p-5 border-b border-slate-700 flex justify-between items-center">
+                <div>
+                    <h2 class="font-bold text-base text-white">Wishlist & Rekonsiliasi Matriks Harian</h2>
+                    <p class="text-xs text-slate-400">Pencocokan otomatis antara omset admin harian dengan file settlement QRIS harian.</p>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-900/60 text-slate-400 text-xs uppercase border-b border-slate-700">
+                            <th class="p-3.5">Tanggal Transaksi</th>
+                            <th class="p-3.5 text-right">Jumlah Tx Admin</th>
+                            <th class="p-3.5 text-right">Total Gross Admin</th>
+                            <th class="p-3.5 text-right">Gross QRIS Settlement</th>
+                            <th class="p-3.5 text-right">Estimasi Fee MDR</th>
+                            <th class="p-3.5 text-right">Net Cair Bank</th>
+                            <th class="p-3.5 text-center">Status Audit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixTableBody" class="divide-y divide-slate-700/50 text-slate-300">
+                        <tr>
+                            <td colspan="7" class="p-6 text-center text-slate-500">Silakan unggah file Master Admin terlebih dahulu.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
 
     <!-- JavaScript Logic -->
     <script>
-        let singleData = [], singleHeaders = [], chartSingleInstance = null;
-        let adminRawData = [], qrisRawData = [], reconciledData = [];
+        let adminData = [];
+        let settlementBatches = {}; // Menyimpan file settlement berdasarkan nama/tanggal
 
-        function switchTab(tab) {
-            if (tab === 'single') {
-                document.getElementById('viewSingle').classList.remove('hidden');
-                document.getElementById('viewReconcile').classList.add('hidden');
-                document.getElementById('tabSingleBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 transition shadow";
-                document.getElementById('tabReconcileBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
-            } else {
-                document.getElementById('viewSingle').classList.add('hidden');
-                document.getElementById('viewReconcile').classList.remove('hidden');
-                document.getElementById('tabReconcileBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 transition shadow";
-                document.getElementById('tabSingleBtn').className = "px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
-            }
-        }
+        // Load data dari LocalStorage saat halaman dibuka
+        window.onload = function() {
+            const savedAdmin = localStorage.getItem('audit_admin_data');
+            const savedSettle = localStorage.getItem('audit_settle_data');
 
-        // Smart parser to handle tab characters and header row shifts
-        function parseSheetSmart(worksheet) {
-            const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-            if (!rawRows || rawRows.length === 0) return { headers: [], data: [] };
-
-            let headerIdx = 0;
-            for (let i = 0; i < Math.min(10, rawRows.length); i++) {
-                let filled = rawRows[i].filter(c => c !== "" && c !== null);
-                if (filled.length >= 2) { headerIdx = i; break; }
-            }
-
-            let headers = rawRows[headerIdx].map((h, i) => h ? String(h).trim() : `Kolom_${i+1}`);
-            let data = [];
-            for (let i = headerIdx + 1; i < rawRows.length; i++) {
-                let row = rawRows[i];
-                if (!row || row.every(c => c === "" || c === null)) continue;
-                let rowObj = {};
-                headers.forEach((h, idx) => {
-                    let val = row[idx] !== undefined ? row[idx] : "";
-                    if (typeof val === 'string') val = val.replace(/\t/g, '').trim();
-                    rowObj[h] = val;
-                });
-                data.push(rowObj);
-            }
-            return { headers, data };
-        }
-
-        // ==================== SINGLE ANALYZER LOGIC ====================
-        function handleSingleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('loadingSingle').classList.remove('hidden');
-            document.getElementById('dropzoneSingle').classList.add('hidden');
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
+            if (savedAdmin) {
                 try {
-                    const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const parsed = parseSheetSmart(worksheet);
+                    adminData = JSON.parse(savedAdmin);
+                    document.getElementById('adminStatusBadge').innerText = `${adminData.length.toLocaleString()} Baris Dimuat`;
+                    document.getElementById('adminStatusBadge').className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold";
+                    document.getElementById('adminFileInfo').style.display = 'block';
+                    document.getElementById('adminFileInfo').innerHTML = `✅ <strong>Master Admin Tersimpan di Browser</strong> (${adminData.length} transaksi)`;
+                } catch(e) { console.error(e); }
+            }
 
-                    singleHeaders = parsed.headers;
-                    singleData = parsed.data;
+            if (savedSettle) {
+                try {
+                    settlementBatches = JSON.parse(savedSettle);
+                    const fileCount = Object.keys(settlementBatches).length;
+                    document.getElementById('settleCountBadge').innerText = `${fileCount} File Tersimpan`;
+                    document.getElementById('settleCountBadge').className = "text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 font-semibold";
+                    document.getElementById('settleFileInfo').style.display = 'block';
+                    document.getElementById('settleFileInfo').innerHTML = `✅ <strong>${fileCount} File Settlement Tersimpan</strong>`;
+                } catch(e) { console.error(e); }
+            }
 
-                    document.getElementById('metaSingleName').innerText = file.name;
-                    document.getElementById('loadingSingle').classList.add('hidden');
-                    document.getElementById('dashboardSingle').classList.remove('hidden');
-                    renderSingleDashboard();
-                } catch (err) {
-                    alert("Gagal membaca file.");
-                    resetSingle();
+            if (adminData.length > 0) {
+                runReconciliation();
+            }
+        };
+
+        // Handle Admin Upload
+        function handleAdminUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    adminData = results.data.map(row => {
+                        // Bersihkan spasi key & string
+                        let cleanRow = {};
+                        for (let k in row) {
+                            cleanRow[k.trim()] = typeof row[k] === 'string' ? row[k].trim() : row[k];
+                        }
+                        return cleanRow;
+                    });
+
+                    // Simpan ke LocalStorage
+                    localStorage.setItem('audit_admin_data', JSON.stringify(adminData));
+
+                    document.getElementById('adminStatusBadge').innerText = `${adminData.length.toLocaleString()} Baris Dimuat`;
+                    document.getElementById('adminStatusBadge').className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold";
+                    document.getElementById('adminFileInfo').style.display = 'block';
+                    document.getElementById('adminFileInfo').innerHTML = `✅ Berhasil memuat file: <strong>${file.name}</strong> (${adminData.length.toLocaleString()} baris)`;
+
+                    runReconciliation();
                 }
-            };
-            reader.readAsArrayBuffer(file);
+            });
         }
 
-        function renderSingleDashboard() {
-            let numericCols = [];
-            let stats = {};
+        // Handle Settlement Upload (Multi-file support)
+        function handleSettlementUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
 
-            singleHeaders.forEach(h => {
-                let isNum = true, sum = 0, count = 0;
-                singleData.forEach(r => {
-                    let v = r[h];
-                    if (v !== "" && v !== null) {
-                        let num = Number(String(v).replace(/[^0-9.-]+/g,""));
-                        if (isNaN(num)) isNum = false; else { sum += num; count++; }
+            let loadedCount = 0;
+            Array.from(files).forEach(file => {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        // Lewati baris header kosong jika ada format row 0 header
+                        let rows = results.data;
+                        if (rows.length > 0 && (!rows[0]['RECORD VALUE'] && !rows[0]['RECORD_VALUE'])) {
+                            // Jika format CSV ada deskripsi di atas
+                            rows = rows.slice(1);
+                        }
+
+                        settlementBatches[file.name] = rows.map(row => {
+                            let cleanRow = {};
+                            for (let k in row) {
+                                cleanRow[k.trim()] = typeof row[k] === 'string' ? row[k].trim() : row[k];
+                            }
+                            return cleanRow;
+                        });
+
+                        loadedCount++;
+                        if (loadedCount === files.length) {
+                            // Simpan ke LocalStorage
+                            localStorage.setItem('audit_settle_data', JSON.stringify(settlementBatches));
+
+                            const fileCount = Object.keys(settlementBatches).length;
+                            document.getElementById('settleCountBadge').innerText = `${fileCount} File Tersimpan`;
+                            document.getElementById('settleCountBadge').className = "text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 font-semibold";
+                            document.getElementById('settleFileInfo').style.display = 'block';
+                            document.getElementById('settleFileInfo').innerHTML = `✅ Total <strong>${fileCount} file settlement</strong> tersimpan di browser.`;
+
+                            runReconciliation();
+                        }
                     }
                 });
-                if (isNum && count > 0) { numericCols.push(h); stats[h] = { sum, avg: sum/count }; }
-            });
-
-            let cardsHtml = `
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Baris</p><h4 class="text-xl font-bold text-white mt-1">${singleData.length.toLocaleString('id-ID')}</h4></div>
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Total Kolom</p><h4 class="text-xl font-bold text-white mt-1">${singleHeaders.length}</h4></div>
-            `;
-            if (numericCols.length > 0) {
-                cardsHtml += `<div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Akumulasi (${numericCols[0]})</p><h4 class="text-xl font-bold text-emerald-400 mt-1">${stats[numericCols[0]].sum.toLocaleString('id-ID')}</h4></div>`;
-                if (numericCols.length > 1) {
-                    cardsHtml += `<div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><p class="text-xs text-slate-400">Akumulasi (${numericCols[1]})</p><h4 class="text-xl font-bold text-indigo-400 mt-1">${stats[numericCols[1]].sum.toLocaleString('id-ID')}</h4></div>`;
-                }
-            }
-            document.getElementById('statCardsSingle').innerHTML = cardsHtml;
-
-            let ins = [`Berhasil memuat ${singleData.length} baris dan ${singleHeaders.length} kolom.`];
-            if (numericCols.length > 0) ins.push(`Kolom <b>"${numericCols[0]}"</b> memiliki total sebesar <b>${stats[numericCols[0]].sum.toLocaleString('id-ID')}</b>.`);
-            document.getElementById('insightsSingle').innerHTML = ins.map(i => `<div class="p-2 bg-slate-950 rounded border border-slate-800 flex items-start space-x-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i><span>${i}</span></div>`).join('');
-
-            let select = document.getElementById('chartColSingle');
-            select.innerHTML = '';
-            (numericCols.length > 0 ? numericCols : singleHeaders).forEach(h => { select.innerHTML += `<option value="${h}">${h}</option>`; });
-            renderChartSingle();
-
-            let thead = document.getElementById('theadSingle');
-            let tbody = document.getElementById('tbodySingle');
-            thead.innerHTML = `<tr>${singleHeaders.map(h => `<th class="px-4 py-2.5">${h}</th>`).join('')}</tr>`;
-            tbody.innerHTML = singleData.slice(0, 100).map(r => `<tr>${singleHeaders.map(h => `<td class="px-4 py-2 border-b border-slate-800">${r[h]}</td>`).join('')}</tr>`).join('');
-        }
-
-        function renderChartSingle() {
-            let col = document.getElementById('chartColSingle').value;
-            if (!col) return;
-            let slice = singleData.slice(0, 15);
-            let labels = slice.map((_, i) => `Baris ${i+1}`);
-            let values = slice.map(r => Number(String(r[col]).replace(/[^0-9.-]+/g,"")) || 0);
-
-            let ctx = document.getElementById('chartCanvasSingle').getContext('2d');
-            if (chartSingleInstance) chartSingleInstance.destroy();
-            chartSingleInstance = new Chart(ctx, {
-                type: 'bar',
-                data: { labels, datasets: [{ label: col, data: values, backgroundColor: '#10b981', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }, y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } } } }
             });
         }
 
-        function filterTableSingle() {
-            let q = document.getElementById('searchSingle').value.toLowerCase();
-            document.querySelectorAll('#tbodySingle tr').forEach(tr => { tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none'; });
-        }
-
-        function resetSingle() {
-            singleData = []; singleHeaders = [];
-            document.getElementById('fileInputSingle').value = '';
-            document.getElementById('dashboardSingle').classList.add('hidden');
-            document.getElementById('dropzoneSingle').classList.remove('hidden');
-        }
-
-        // ==================== RECONCILIATION LOGIC ====================
-        function handleAdminFile(e) {
-            let file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('labelAdmin').innerText = file.name;
-            let reader = new FileReader();
-            reader.onload = function(evt) {
-                let wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                adminRawData = parseSheetSmart(wb.Sheets[wb.SheetNames[0]]).data;
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function handleQrisFile(e) {
-            let file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('labelQris').innerText = file.name;
-            let reader = new FileReader();
-            reader.onload = function(evt) {
-                let wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                qrisRawData = parseSheetSmart(wb.Sheets[wb.SheetNames[0]]).data;
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
+        // Core Reconciliation Engine
         function runReconciliation() {
-            if (adminRawData.length === 0 || qrisRawData.length === 0) {
-                alert("Harap upload kedua file (Admin dan Settlement QRIS) terlebih dahulu!");
-                return;
+            if (!adminData.length) return;
+
+            // 1. Group Admin Data by Date
+            let adminByDate = {};
+            let totalAdminTxAll = 0;
+            let totalAdminNominalAll = 0;
+
+            adminData.forEach(row => {
+                let tglRaw = row['Tanggal penerimaan'] || row['Tanggal'] || '';
+                let dateOnly = tglRaw.split(' ')[0];
+                if (!dateOnly || dateOnly.length < 10) return;
+
+                let amount = parseFloat(row['Jumlah'] || row['RECORD VALUE'] || 0);
+                let orderId = row['Dari Rekening Bank'] || row['PARTNER ID'] || '';
+
+                if (!adminByDate[dateOnly]) {
+                    adminByDate[dateOnly] = { count: 0, gross: 0, orderIds: new Set() };
+                }
+                adminByDate[dateOnly].count++;
+                adminByDate[dateOnly].gross += amount;
+                if (orderId) adminByDate[dateOnly].orderIds.add(orderId);
+
+                totalAdminTxAll++;
+                totalAdminNominalAll += amount;
+            });
+
+            // 2. Kumpulkan semua Order ID dari settlement files yang diupload
+            let allSettlementOrderIds = new Map(); // orderId -> { gross, fee }
+            let totalSettleTxAll = 0;
+            let totalSettleGrossAll = 0;
+            let totalSettleFeeAll = 0;
+
+            for (let fileName in settlementBatches) {
+                settlementBatches[fileName].forEach(row => {
+                    let orderId = row['PARTNER ID'] || row['TICKET'] || row['ORDER ID'] || '';
+                    let val = parseFloat(row['RECORD VALUE'] || row['RECORD_VALUE'] || 0);
+                    let fee = parseFloat(row['RECORD FEE'] || row['RECORD_FEE'] || 0);
+
+                    if (orderId) {
+                        allSettlementOrderIds.set(orderId, { gross: val, fee: fee });
+                        totalSettleTxAll++;
+                        totalSettleGrossAll += val;
+                        totalSettleFeeAll += fee;
+                    }
+                });
             }
 
-            let qrisMap = {};
-            qrisRawData.forEach(q => {
-                let key = String(q['PARTNER ID'] || q['TICKET'] || q['ID'] || '').trim();
-                if (key) qrisMap[key] = q;
-            });
+            // Update Summary Cards
+            document.getElementById('sumAdminTx').innerText = totalAdminTxAll.toLocaleString();
+            document.getElementById('sumAdminNominal').innerText = `Rp ${totalAdminNominalAll.toLocaleString('id-ID')}`;
+            document.getElementById('sumSettleTx').innerText = totalSettleTxAll.toLocaleString();
+            document.getElementById('sumSettleNominal').innerText = `Rp ${totalSettleGrossAll.toLocaleString('id-ID')}`;
+            document.getElementById('sumFeeNominal').innerText = `Rp ${totalSettleFeeAll.toLocaleString('id-ID')}`;
 
-            let matchCount = 0, unmatchCount = 0, matchVal = 0, unmatchVal = 0, totalFee = 0;
-            reconciledData = [];
+            // 3. Render Wishlist Matrix Table
+            let sortedDates = Object.keys(adminByDate).sort();
+            let html = '';
+            let matchedDaysCount = 0;
 
-            adminRawData.forEach(adm => {
-                let admId = String(adm['Dari Rekening Bank'] || adm['ORDER ID'] || adm['ID'] || adm['Ticket'] || '').trim();
-                let admAmount = Number(String(adm['Jumlah'] || adm['RECORD VALUE'] || adm['Value'] || '0').replace(/[^0-9.-]+/g,"")) || 0;
+            sortedDates.forEach(date => {
+                let adminInfo = adminByDate[date];
+                
+                // Hitung berapa order ID dari tanggal admin ini yang sudah masuk di settlement files
+                let matchedCount = 0;
+                let settleGrossForDate = 0;
+                let settleFeeForDate = 0;
 
-                let foundQris = qrisMap[admId];
-                if (foundQris) {
-                    matchCount++;
-                    matchVal += admAmount;
-                    let fee = Number(String(foundQris['RECORD FEE'] || '0').replace(/[^0-9.-]+/g,"")) || 0;
-                    totalFee += fee;
-                    reconciledData.push({ id: admId, source: 'Admin', val: admAmount, status: 'MATCH (SUKSES)', fee: fee, note: 'Cair di QRIS' });
+                adminInfo.orderIds.forEach(id => {
+                    if (allSettlementOrderIds.has(id)) {
+                        matchedCount++;
+                        let item = allSettlementOrderIds.get(id);
+                        settleGrossForDate += item.gross;
+                        settleFeeForDate += item.fee;
+                    }
+                });
+
+                let statusBadge = '';
+                if (Object.keys(settlementBatches).length === 0) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-400">Menunggu File QRIS</span>`;
+                } else if (matchedCount === 0) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-400">Belum Ada Settlement</span>`;
+                } else if (matchedCount === adminInfo.count) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400">🟢 100% KLOP</span>`;
+                    matchedDaysCount++;
                 } else {
-                    unmatchCount++;
-                    unmatchVal += admAmount;
-                    reconciledData.push({ id: admId || 'Unknown', source: 'Admin', val: admAmount, status: 'BELUM CAIR / PENDING', fee: 0, note: 'Tidak ditemukan di Settlement' });
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400">🟡 Sebagian (${matchedCount}/${adminInfo.count})</span>`;
                 }
+
+                let netCair = settleGrossForDate - settleFeeForDate;
+
+                html += `
+                    <tr class="hover:bg-slate-700/30 transition">
+                        <td class="p-3.5 font-medium text-white">${date}</td>
+                        <td class="p-3.5 text-right font-mono">${adminInfo.count.toLocaleString()}</td>
+                        <td class="p-3.5 text-right font-mono text-emerald-400">Rp ${adminInfo.gross.toLocaleString('id-ID')}</td>
+                        <td class="p-3.5 text-right font-mono text-blue-400">Rp ${settleGrossForDate.toLocaleString('id-ID')}</td>
+                        <td class="p-3.5 text-right font-mono text-rose-400">Rp ${settleFeeForDate.toLocaleString('id-ID')}</td>
+                        <td class="p-3.5 text-right font-mono text-teal-300 font-semibold">Rp ${netCair.toLocaleString('id-ID')}</td>
+                        <td class="p-3.5 text-center">${statusBadge}</td>
+                    </tr>
+                `;
             });
 
-            document.getElementById('recMatchCount').innerText = matchCount.toLocaleString('id-ID');
-            document.getElementById('recMatchVal').innerText = 'Rp ' + matchVal.toLocaleString('id-ID');
-            document.getElementById('recUnmatchCount').innerText = unmatchCount.toLocaleString('id-ID');
-            document.getElementById('recUnmatchVal').innerText = 'Rp ' + unmatchVal.toLocaleString('id-ID');
-            document.getElementById('recFeeTotal').innerText = 'Rp ' + totalFee.toLocaleString('id-ID');
+            document.getElementById('matrixTableBody').innerHTML = html;
 
-            let tbody = document.getElementById('tbodyRec');
-            tbody.innerHTML = reconciledData.slice(0, 150).map(r => `
-                <tr>
-                    <td class="px-4 py-2.5 border-b border-slate-800 font-mono text-xs">${r.id}</td>
-                    <td class="px-4 py-2.5 border-b border-slate-800">${r.source}</td>
-                    <td class="px-4 py-2.5 border-b border-slate-800">Rp ${r.val.toLocaleString('id-ID')}</td>
-                    <td class="px-4 py-2.5 border-b border-slate-800"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.status.includes('MATCH') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${r.status}</span></td>
-                    <td class="px-4 py-2.5 border-b border-slate-800">Rp ${r.fee.toLocaleString('id-ID')}</td>
-                    <td class="px-4 py-2.5 border-b border-slate-800 text-slate-400">${r.note}</td>
-                </tr>
-            `).join('');
-
-            document.getElementById('resultReconcile').classList.remove('hidden');
+            if (Object.keys(settlementBatches).length > 0) {
+                document.getElementById('globalAuditStatus').innerText = `${matchedDaysCount} Tanggal Klop`;
+                document.getElementById('globalAuditStatus').className = "text-lg font-bold text-emerald-400 mt-1";
+            }
         }
 
-        function filterTableRec() {
-            let q = document.getElementById('searchRec').value.toLowerCase();
-            document.querySelectorAll('#tbodyRec tr').forEach(tr => { tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+        // Reset Semua Data
+        function resetAllData() {
+            if (confirm("Apakah Anda yakin ingin menghapus seluruh data yang tersimpan di browser?")) {
+                localStorage.removeItem('audit_admin_data');
+                localStorage.removeItem('audit_settle_data');
+                adminData = [];
+                settlementBatches = {};
+                location.reload();
+            }
         }
     </script>
 </body>
